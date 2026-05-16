@@ -4,10 +4,15 @@ import { useTracker } from "../hooks/useTracker.js";
 import { CalendarStrip } from "../components/tracker/CalendarStrip.jsx";
 import { TaskCard } from "../components/tracker/TaskCard.jsx";
 import { Ring } from "../components/ui/Ring.jsx";
-import { TRACKED_TASKS, FONTS } from "../lib/constants.js";
+import { TRACKED_TASKS, FONTS, DAY_SCHEDULE } from "../lib/constants.js";
 
 function todayKey() {
   return new Date().toISOString().split("T")[0];
+}
+
+function getTasksForDay(dateStr) {
+  const dow = new Date(dateStr + "T00:00:00").getDay();
+  return TRACKED_TASKS.filter(t => DAY_SCHEDULE[dow].includes(t.id));
 }
 
 function formatLongDate(dateKey) {
@@ -25,7 +30,13 @@ export default function TrackerPage() {
   const [selectedDate, setSelectedDate] = useState(todayKey());
   const { loading, toggle, isDone, getTaskData, updateTaskDetails, getStreak, getRate, getStatsForDate, getBestStreak, ensureRange, data: trackerData } = useTracker(user?.id);
 
-  const stats = getStatsForDate(selectedDate);
+  const tasksForDay = getTasksForDay(selectedDate);
+  const doneCount = tasksForDay.filter(t => isDone(selectedDate, t.id)).length;
+  const stats = {
+    done: doneCount,
+    total: tasksForDay.length,
+    pct: tasksForDay.length === 0 ? 0 : Math.round((doneCount / tasksForDay.length) * 100),
+  };
   const bestStreak = getBestStreak();
 
   const handleMonthChange = (year, month) => {
@@ -73,9 +84,23 @@ export default function TrackerPage() {
         </div>
       </div>
 
+      {/* Sunday rest day notice */}
+      {new Date(selectedDate + "T00:00:00").getDay() === 0 && (
+        <div style={{
+          padding: "10px 14px", borderRadius: 8, marginBottom: 12,
+          background: "#0D1533", border: "1px solid #1E3A8A",
+          display: "flex", alignItems: "center", gap: 8,
+        }}>
+          <span style={{ fontSize: 13 }}>😴</span>
+          <span style={{ fontSize: 12, color: "#4A5568", lineHeight: 1.5 }}>
+            <strong style={{ color: "#818CF8" }}>Rest Day</strong> — all tasks are optional. Check off anything you do, no pressure.
+          </span>
+        </div>
+      )}
+
       {/* Task grid — 2 cols */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-        {TRACKED_TASKS.map(task => (
+        {tasksForDay.map(task => (
           <TaskCard
             key={task.id}
             task={task}

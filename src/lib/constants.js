@@ -90,3 +90,13 @@ export const METRIC_UNITS = {
   "Body Fat %": "%",
   "Caloric Intake": "kcal",
 };
+
+export const DAY_SCHEDULE = {
+  0: ["gym","jobprep","catprep","videditing","sidehustle","hobbies","book","diet","sleep","decompress"], // Sun (rest)
+  1: ["gym","jobprep","book","catprep","videditing","office","decompress","diet","sleep"],               // Mon
+  2: ["gym","jobprep","book","office","decompress","diet","sleep"],                                      // Tue
+  3: ["gym","jobprep","book","catprep","sidehustle","office","decompress","diet","sleep"],               // Wed
+  4: ["gym","jobprep","book","office","decompress","diet","sleep"],                                      // Thu
+  5: ["gym","jobprep","book","hobbies","sidehustle","office","decompress","diet","sleep"],               // Fri
+  6: ["gym","jobprep","catprep","videditing","sidehustle","hobbies","book","diet","sleep","decompress"], // Sat
+};
