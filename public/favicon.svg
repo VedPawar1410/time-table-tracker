@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#08091A"/>
+
+  <!-- 2x2 colored grid representing the 4 main task categories -->
+  <!-- Top-left: Blue (Book / Learning) -->
+  <rect x="32" y="32" width="214" height="214" rx="32" fill="#1D4ED8"/>
+  <!-- Top-right: Amber (Gym / Work) -->
+  <rect x="266" y="32" width="214" height="214" rx="32" fill="#D97706"/>
+  <!-- Bottom-left: Green (Diet / Health) -->
+  <rect x="32" y="266" width="214" height="214" rx="32" fill="#16A34A"/>
+  <!-- Bottom-right: Red (Job Prep) -->
+  <rect x="266" y="266" width="214" height="214" rx="32" fill="#DC2626"/>
+</svg>
