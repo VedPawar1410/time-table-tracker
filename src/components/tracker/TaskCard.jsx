@@ -61,7 +61,7 @@ export function TaskCard({ task, selectedDate, isDone, getTaskData, toggle, upda
       {expanded && (
         <div style={{ padding: "2px 14px 14px", borderTop: `1px solid ${task.bd}22` }}>
           <div style={{ marginBottom: 12 }}>
-            <SpecificForm data={taskData} update={update} />
+            <SpecificForm data={taskData} update={update} date={selectedDate} />
           </div>
           <div style={{ display: "flex", gap: 6 }}>
             <StatBadge label="Current Streak" value={streak > 0 ? `${streak}d` : "—"} color={task.tx} />

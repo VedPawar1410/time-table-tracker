@@ -237,6 +237,16 @@ export async function addReadingSession(userId, session) {
   return data;
 }
 
+export async function deleteReadingSession(sessionId) {
+  const { error } = await supabase.from("reading_sessions").delete().eq("id", sessionId);
+  if (error) throw error;
+}
+
+export async function deleteBook(bookId) {
+  const { error } = await supabase.from("books").delete().eq("id", bookId);
+  if (error) throw error;
+}
+
 // ─── Job Prep ─────────────────────────────────────────────────────────────────
 
 export async function getJobPrepSessions(userId, limit = 30) {
@@ -258,6 +268,11 @@ export async function addJobPrepSession(userId, session) {
     .single();
   if (error) throw error;
   return data;
+}
+
+export async function deleteJobPrepSession(sessionId) {
+  const { error } = await supabase.from("job_prep_sessions").delete().eq("id", sessionId);
+  if (error) throw error;
 }
 
 export async function getLeetcodeProblems(userId, filters = {}) {
@@ -289,6 +304,11 @@ export async function updateLeetcodeProblem(problemId, updates) {
   if (error) throw error;
 }
 
+export async function deleteLeetcodeProblem(problemId) {
+  const { error } = await supabase.from("leetcode_problems").delete().eq("id", problemId);
+  if (error) throw error;
+}
+
 // ─── CAT Prep ─────────────────────────────────────────────────────────────────
 
 export async function getCatSessions(userId, limit = 30) {
@@ -310,6 +330,11 @@ export async function addCatSession(userId, session) {
     .single();
   if (error) throw error;
   return data;
+}
+
+export async function deleteCatSession(sessionId) {
+  const { error } = await supabase.from("cat_prep_sessions").delete().eq("id", sessionId);
+  if (error) throw error;
 }
 
 // ─── Generic Task Sessions ────────────────────────────────────────────────────
@@ -336,6 +361,11 @@ export async function addTaskSession(userId, taskId, session) {
   return data;
 }
 
+export async function deleteTaskSession(sessionId) {
+  const { error } = await supabase.from("task_sessions").delete().eq("id", sessionId);
+  if (error) throw error;
+}
+
 // ─── Gym — Extended ───────────────────────────────────────────────────────────
 
 export async function getExerciseHistory(userId, exerciseName) {
@@ -358,16 +388,22 @@ export async function getGymCalendarData(userId, year, month) {
   const start = `${year}-${String(month).padStart(2, "0")}-01`;
   const lastDay = new Date(year, month, 0).getDate();
   const end = `${year}-${String(month).padStart(2, "0")}-${lastDay}`;
-  const { data, error } = await supabase
-    .from("gym_workouts")
-    .select("log_date, workout_type")
-    .eq("user_id", userId)
-    .gte("log_date", start)
-    .lte("log_date", end);
-  if (error) throw error;
+
+  const [{ data: workouts, error: wErr }, { data: logs, error: lErr }] = await Promise.all([
+    supabase.from("gym_workouts").select("log_date, workout_type").eq("user_id", userId).gte("log_date", start).lte("log_date", end),
+    supabase.from("daily_logs").select("log_date, metadata").eq("user_id", userId).eq("task_id", "gym").gte("log_date", start).lte("log_date", end),
+  ]);
+  if (wErr) throw wErr;
+  if (lErr) throw lErr;
+
   const map = {};
-  for (const row of data) {
+  for (const row of workouts) {
     map[row.log_date] = { type: row.workout_type };
+  }
+  for (const row of logs) {
+    if (row.metadata?.rest_day && !map[row.log_date]) {
+      map[row.log_date] = { type: "rest" };
+    }
   }
   return map;
 }

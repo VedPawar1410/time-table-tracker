@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { FONTS, MUSCLE_GROUPS } from "../../../lib/constants.js";
+import { CalendarPicker } from "../../../components/ui/CalendarPicker.jsx";
 import { createGymWorkout, upsertExerciseInLibrary, updateExercisePR, upsertLog } from "../../../lib/db.js";
 import { ExerciseBlock } from "./ExerciseBlock.jsx";
 
@@ -156,7 +157,7 @@ export function WorkoutLogger({ open, onClose, library, onSaved, userId }) {
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
-          <Field label="Date"><input type="date" value={date} onChange={e => setDate(e.target.value)} style={inputStyle()} /></Field>
+          <CalendarPicker label="Date" value={date} onChange={v => setDate(v)} />
           <Field label="Duration (min)"><input type="number" value={duration} onChange={e => setDuration(e.target.value)} placeholder="60" style={inputStyle()} /></Field>
           <Field label={`Bodyweight (${weightUnit})`}><input type="number" value={bodyweight} onChange={e => setBodyweight(e.target.value)} placeholder="70" style={inputStyle()} /></Field>
           <Field label="How did it feel?">

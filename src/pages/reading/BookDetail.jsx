@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth.js";
-import { getBookById, getReadingSessions, addReadingSession, updateBook, upsertLog } from "../../lib/db.js";
+import { getBookById, getReadingSessions, addReadingSession, deleteReadingSession, updateBook, upsertLog } from "../../lib/db.js";
 import { Button } from "../../components/ui/Button.jsx";
 import { Modal } from "../../components/ui/Modal.jsx";
 import { Input } from "../../components/ui/Input.jsx";
 import { TextArea } from "../../components/ui/TextArea.jsx";
 import { Select } from "../../components/ui/Select.jsx";
 import { FONTS } from "../../lib/constants.js";
+import { CalendarPicker } from "../../components/ui/CalendarPicker.jsx";
 
 function todayKey() { return new Date().toISOString().split("T")[0]; }
 
@@ -28,6 +29,12 @@ export default function BookDetail() {
       .then(([b, s]) => { setBook(b); setSessions(s); })
       .finally(() => setLoading(false));
   }, [bookId, user?.id]);
+
+  const deleteSession = async (id) => {
+    if (!window.confirm("Delete this reading session? This cannot be undone.")) return;
+    await deleteReadingSession(id);
+    setSessions(prev => prev.filter(s => s.id !== id));
+  };
 
   const saveSession = async () => {
     setSaving(true);
@@ -94,7 +101,10 @@ export default function BookDetail() {
                   {s.start_page && s.end_page && <span style={{ fontSize: 12, color: "#4A5568" }}>pp. {s.start_page}–{s.end_page}</span>}
                   {s.duration_min && <span style={{ fontSize: 12, color: "#4A5568" }}>⏱ {s.duration_min}m</span>}
                 </div>
-                <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: "#2D3748" }}>{s.log_date}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: "#2D3748" }}>{s.log_date}</span>
+                  <button onClick={() => deleteSession(s.id)} style={{ background: "transparent", border: "none", color: "#4A5568", cursor: "pointer", fontSize: 14, padding: 0, lineHeight: 1 }} title="Delete">✕</button>
+                </div>
               </div>
               {s.highlights && <div style={{ color: "#4A5568", fontSize: 12.5, fontStyle: "italic", lineHeight: 1.6, borderLeft: "2px solid #1D4ED844", paddingLeft: 10, marginTop: 6 }}>{s.highlights}</div>}
               {s.notes && <div style={{ color: "#4A5568", fontSize: 12.5, lineHeight: 1.6, marginTop: 6 }}>{s.notes}</div>}
@@ -105,7 +115,7 @@ export default function BookDetail() {
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Log Reading Session">
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <Input label="Date" type="date" value={form.log_date} onChange={v => setForm(f => ({ ...f, log_date: v }))} />
+          <CalendarPicker label="Date" value={form.log_date} onChange={v => setForm(f => ({ ...f, log_date: v }))} />
           <div style={{ display: "flex", gap: 10 }}>
             <Input label="Start Page" type="number" value={form.start_page} onChange={v => setForm(f => ({ ...f, start_page: v }))} placeholder="50" />
             <Input label="End Page" type="number" value={form.end_page} onChange={v => setForm(f => ({ ...f, end_page: v }))} placeholder="70" />

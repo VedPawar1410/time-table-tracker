@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { FONTS, MEASUREMENT_METRICS, METRIC_UNITS } from "../../../lib/constants.js";
+import { CalendarPicker } from "../../../components/ui/CalendarPicker.jsx";
 import { getAllLatestMeasurements, getMeasurements, addMeasurement, deleteMeasurement } from "../../../lib/db.js";
 
 function todayKey() { return new Date().toISOString().split("T")[0]; }
@@ -165,7 +166,7 @@ export function MeasurementsTab({ userId }) {
             <div style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 15, color: "#F1F5F9", marginBottom: 4 }}>Add {addingFor}</div>
             <div style={{ fontSize: 11, color: "#475569", fontFamily: FONTS.sans, marginBottom: 16 }}>Unit: {unitFor(addingFor)}</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 18 }}>
-              <Field label="Date"><input type="date" value={addDate} onChange={e => setAddDate(e.target.value)} style={iStyle()} /></Field>
+              <CalendarPicker label="Date" value={addDate} onChange={v => setAddDate(v)} />
               <Field label={`Value (${unitFor(addingFor)})`}><input type="number" value={addVal} onChange={e => setAddVal(e.target.value)} placeholder="0.0" step="0.1" autoFocus style={iStyle()} /></Field>
             </div>
             <div style={{ display: "flex", gap: 8 }}>

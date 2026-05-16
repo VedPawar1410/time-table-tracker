@@ -9,6 +9,7 @@ const TYPE_COLOR = {
   weights: { dot: "#3B82F6", label: "Weights" },
   cardio:  { dot: "#22C55E", label: "Cardio" },
   mixed:   { dot: "#A78BFA", label: "Mixed" },
+  rest:    { dot: "#4A5568", label: "Rest Day" },
 };
 
 export function CalendarTab({ userId, sessions }) {
@@ -133,7 +134,9 @@ export function CalendarTab({ userId, sessions }) {
                 onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = isToday ? "rgba(255,255,255,0.06)" : "transparent"; }}
               >
                 <span style={{ fontSize: 13, fontFamily: FONTS.mono, color: isToday ? "#F1F5F9" : entry ? "#CBD5E1" : "#334155" }}>{day}</span>
-                {dotColor && <div style={{ width: 5, height: 5, borderRadius: "50%", background: dotColor }} />}
+                {entry?.type === "rest"
+                  ? <span style={{ fontSize: 9, lineHeight: 1 }}>🌙</span>
+                  : dotColor && <div style={{ width: 5, height: 5, borderRadius: "50%", background: dotColor }} />}
               </div>
             );
           })}
@@ -164,9 +167,18 @@ export function CalendarTab({ userId, sessions }) {
         </div>
       )}
 
-      {selectedDay && !selectedSession && (
+      {selectedDay && !selectedSession && calData[selectedDay]?.type === "rest" && (
+        <div style={{ marginTop: 20, padding: "14px 16px", background: "rgba(15,23,42,0.6)", border: "1px solid #1E293B", borderRadius: 14, display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 20 }}>🌙</span>
+          <div>
+            <div style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 13, color: "#94A3B8" }}>Rest Day</div>
+            <div style={{ fontSize: 11, color: "#475569", fontFamily: FONTS.sans }}>{selectedDay}</div>
+          </div>
+        </div>
+      )}
+      {selectedDay && !selectedSession && calData[selectedDay] && calData[selectedDay].type !== "rest" && (
         <div style={{ marginTop: 20, padding: "12px 16px", background: "rgba(15,23,42,0.6)", border: "1px solid rgba(59,130,246,0.1)", borderRadius: 14, fontSize: 12, color: "#475569", fontFamily: FONTS.sans }}>
-          Workout on {selectedDay} — detail not loaded yet. View in History tab.
+          Workout on {selectedDay} — view in History tab for details.
         </div>
       )}
     </div>

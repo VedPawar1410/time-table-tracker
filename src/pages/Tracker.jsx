@@ -23,7 +23,7 @@ function formatLongDate(dateKey) {
 export default function TrackerPage() {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(todayKey());
-  const { loading, toggle, isDone, getTaskData, updateTaskDetails, getStreak, getRate, getStatsForDate, getBestStreak, ensureRange } = useTracker(user?.id);
+  const { loading, toggle, isDone, getTaskData, updateTaskDetails, getStreak, getRate, getStatsForDate, getBestStreak, ensureRange, data: trackerData } = useTracker(user?.id);
 
   const stats = getStatsForDate(selectedDate);
   const bestStreak = getBestStreak();
@@ -45,7 +45,7 @@ export default function TrackerPage() {
         </h1>
       </div>
 
-      <CalendarStrip selectedDate={selectedDate} setSelectedDate={setSelectedDate} onMonthChange={handleMonthChange} />
+      <CalendarStrip selectedDate={selectedDate} setSelectedDate={setSelectedDate} onMonthChange={handleMonthChange} getStatsForDate={getStatsForDate} onYearView={() => { const now = new Date(); ensureRange(`${now.getFullYear()}-01-01`, todayKey()); }} />
 
       {/* Day summary */}
       <div style={{

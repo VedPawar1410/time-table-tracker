@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../hooks/useAuth.js";
-import { getJobPrepSessions, addJobPrepSession, getLeetcodeProblems, addLeetcodeProblem, upsertLog } from "../../lib/db.js";
+import { getJobPrepSessions, addJobPrepSession, deleteJobPrepSession, getLeetcodeProblems, addLeetcodeProblem, deleteLeetcodeProblem, upsertLog } from "../../lib/db.js";
 import { PageHeader } from "../../components/layout/PageHeader.jsx";
 import { Button } from "../../components/ui/Button.jsx";
 import { Modal } from "../../components/ui/Modal.jsx";
@@ -9,6 +9,7 @@ import { TextArea } from "../../components/ui/TextArea.jsx";
 import { Select } from "../../components/ui/Select.jsx";
 import { StatBadge } from "../../components/ui/StatBadge.jsx";
 import { FONTS } from "../../lib/constants.js";
+import { CalendarPicker } from "../../components/ui/CalendarPicker.jsx";
 
 function todayKey() { return new Date().toISOString().split("T")[0]; }
 
@@ -41,6 +42,18 @@ export default function JobPrepPage() {
   }, [user?.id, filters]);
 
   useEffect(() => { load(); }, [load]);
+
+  const deleteSession = async (id) => {
+    if (!window.confirm("Delete this session? This cannot be undone.")) return;
+    await deleteJobPrepSession(id);
+    setSessions(prev => prev.filter(s => s.id !== id));
+  };
+
+  const deleteProblem = async (id) => {
+    if (!window.confirm("Delete this problem? This cannot be undone.")) return;
+    await deleteLeetcodeProblem(id);
+    setProblems(prev => prev.filter(p => p.id !== id));
+  };
 
   const saveSession = async () => {
     setSaving(true);
@@ -130,7 +143,10 @@ export default function JobPrepPage() {
                   </div>
                   {s.notes && <div style={{ color: "#4A5568", fontSize: 12.5, lineHeight: 1.6 }}>{s.notes}</div>}
                 </div>
-                <div style={{ fontFamily: FONTS.mono, fontSize: 11, color: "#2D3748", flexShrink: 0 }}>{s.log_date}</div>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
+                  <div style={{ fontFamily: FONTS.mono, fontSize: 11, color: "#2D3748" }}>{s.log_date}</div>
+                  <button onClick={() => deleteSession(s.id)} style={{ background: "transparent", border: "none", color: "#4A5568", cursor: "pointer", fontSize: 14, padding: 0, lineHeight: 1 }} title="Delete">✕</button>
+                </div>
               </div>
             </div>
           ))}
@@ -163,6 +179,7 @@ export default function JobPrepPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end", flexShrink: 0 }}>
                 <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 20, background: "transparent", border: `1px solid ${DIFFICULTY_COLORS[p.difficulty]}44`, color: DIFFICULTY_COLORS[p.difficulty], fontFamily: FONTS.mono, textTransform: "capitalize" }}>{p.difficulty}</span>
                 <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 20, background: "transparent", border: `1px solid ${STATUS_COLORS[p.status]}44`, color: STATUS_COLORS[p.status], fontFamily: FONTS.mono, textTransform: "capitalize" }}>{p.status}</span>
+                <button onClick={() => deleteProblem(p.id)} style={{ background: "transparent", border: "none", color: "#4A5568", cursor: "pointer", fontSize: 14, padding: 0, lineHeight: 1 }} title="Delete">✕</button>
               </div>
             </div>
           ))}
@@ -173,7 +190,7 @@ export default function JobPrepPage() {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Log Job Prep Session">
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={{ display: "flex", gap: 10 }}>
-            <Input label="Date" type="date" value={form.log_date} onChange={v => setForm(f => ({ ...f, log_date: v }))} />
+            <CalendarPicker label="Date" value={form.log_date} onChange={v => setForm(f => ({ ...f, log_date: v }))} />
             <Select label="Focus" value={form.focus_type} onChange={v => setForm(f => ({ ...f, focus_type: v }))}
               options={[{ value: "leetcode", label: "LeetCode" }, { value: "sysdesign", label: "System Design" }, { value: "mock", label: "Mock Interview" }, { value: "other", label: "Other" }]} />
           </div>
@@ -199,7 +216,7 @@ export default function JobPrepPage() {
             <Select label="Status" value={lcForm.status} onChange={v => setLcForm(f => ({ ...f, status: v }))}
               options={[{ value: "solved", label: "Solved" }, { value: "attempted", label: "Attempted" }, { value: "revisit", label: "Needs Revisit" }]} />
           </div>
-          <Input label="Date" type="date" value={lcForm.log_date} onChange={v => setLcForm(f => ({ ...f, log_date: v }))} />
+          <CalendarPicker label="Date" value={lcForm.log_date} onChange={v => setLcForm(f => ({ ...f, log_date: v }))} />
           <TextArea label="Approach / Solution notes" value={lcForm.approach} onChange={v => setLcForm(f => ({ ...f, approach: v }))} placeholder="Two pointers, hash map approach..." />
           <Button variant="solid" color="#FCA5A5" onClick={saveProblem} disabled={saving}>{saving ? "Saving..." : "Save Problem"}</Button>
         </div>

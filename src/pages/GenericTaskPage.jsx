@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../hooks/useAuth.js";
-import { getTaskSessions, addTaskSession, upsertLog } from "../lib/db.js";
+import { getTaskSessions, addTaskSession, deleteTaskSession, upsertLog } from "../lib/db.js";
 import { PageHeader } from "../components/layout/PageHeader.jsx";
 import { Button } from "../components/ui/Button.jsx";
 import { Modal } from "../components/ui/Modal.jsx";
@@ -8,6 +8,7 @@ import { Input } from "../components/ui/Input.jsx";
 import { TextArea } from "../components/ui/TextArea.jsx";
 import { StatBadge } from "../components/ui/StatBadge.jsx";
 import { FONTS } from "../lib/constants.js";
+import { CalendarPicker } from "../components/ui/CalendarPicker.jsx";
 
 function todayKey() { return new Date().toISOString().split("T")[0]; }
 
@@ -28,6 +29,12 @@ export function GenericTaskPage({ taskId, title, icon, subtitle, accentColor }) 
   }, [user?.id, taskId]);
 
   useEffect(() => { load(); }, [load]);
+
+  const deleteSession = async (id) => {
+    if (!window.confirm("Delete this session? This cannot be undone.")) return;
+    await deleteTaskSession(id);
+    setSessions(prev => prev.filter(s => s.id !== id));
+  };
 
   const save = async () => {
     setSaving(true);
@@ -92,7 +99,10 @@ export function GenericTaskPage({ taskId, title, icon, subtitle, accentColor }) 
                   {s.outcome && <div style={{ color: "#4A5568", fontSize: 12.5, lineHeight: 1.5 }}>✓ {s.outcome}</div>}
                   {s.notes && <div style={{ color: "#4A5568", fontSize: 12.5, lineHeight: 1.5, marginTop: 4 }}>{s.notes}</div>}
                 </div>
-                <div style={{ fontFamily: FONTS.mono, fontSize: 11, color: "#2D3748", flexShrink: 0 }}>{s.log_date}</div>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
+                  <div style={{ fontFamily: FONTS.mono, fontSize: 11, color: "#2D3748" }}>{s.log_date}</div>
+                  <button onClick={() => deleteSession(s.id)} style={{ background: "transparent", border: "none", color: "#4A5568", cursor: "pointer", fontSize: 14, padding: 0, lineHeight: 1 }} title="Delete">✕</button>
+                </div>
               </div>
             </div>
           ))}
@@ -102,7 +112,7 @@ export function GenericTaskPage({ taskId, title, icon, subtitle, accentColor }) 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={`Log ${title} Session`}>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={{ display: "flex", gap: 10 }}>
-            <Input label="Date" type="date" value={form.log_date} onChange={v => setForm(f => ({ ...f, log_date: v }))} />
+            <CalendarPicker label="Date" value={form.log_date} onChange={v => setForm(f => ({ ...f, log_date: v }))} />
             <Input label="Duration (min)" type="number" value={form.duration_min} onChange={v => setForm(f => ({ ...f, duration_min: v }))} placeholder="60" />
           </div>
           <Input label="What did you plan to do?" value={form.session_goal} onChange={v => setForm(f => ({ ...f, session_goal: v }))} placeholder="Session goal..." />
