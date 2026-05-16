@@ -9,6 +9,7 @@ export const TRACKED_TASKS = [
   { id: "sleep",      label: "Sleep by 12 AM",     icon: "😴", bd: "#1E3A8A", tx: "#818CF8", bg: "#0D1533" },
   { id: "office",     label: "Office",             icon: "🏢", bd: "#166534", tx: "#4ADE80", bg: "#052E16" },
   { id: "decompress", label: "Decompress",         icon: "🌿", bd: "#115E59", tx: "#5EEAD4", bg: "#022c22" },
+  { id: "diet",       label: "Diet Tracking",      icon: "🥗", bd: "#15803D", tx: "#4ADE80", bg: "#021A0A" },
 ];
 
 export const TASK_MAP = Object.fromEntries(TRACKED_TASKS.map(t => [t.id, t]));
@@ -30,6 +31,7 @@ export const C = {
   sidehustle: { bg: "#1A1000", bd: "#D97706", tx: "#FEF08A" },
   hobbies:    { bg: "#0D0520", bd: "#7C3AED", tx: "#DDD6FE" },
   sleep:      { bg: "#0D1533", bd: "#1E3A8A", tx: "#818CF8" },
+  diet:       { bg: "#021A0A", bd: "#15803D", tx: "#4ADE80" },
 };
 
 export const FONT_IMPORT = `
@@ -66,6 +68,12 @@ export const DEFAULT_EXERCISES = {
   Cardio: ["Running", "Cycling", "Jump Rope", "HIIT", "Stairmaster", "Elliptical"],
   "Full Body": ["Clean and Press", "Kettlebell Swing", "Burpees", "Thrusters"],
 };
+
+export const DIET_MEAL_DEFS = [
+  { type: "breakfast", label: "Breakfast", icon: "🌅", defaultTime: "08:00", sortOrder: 0 },
+  { type: "lunch",     label: "Lunch",     icon: "☀️",  defaultTime: "13:00", sortOrder: 10 },
+  { type: "dinner",    label: "Dinner",    icon: "🌙",  defaultTime: "19:00", sortOrder: 20 },
+];
 
 export const MEASUREMENT_METRICS = {
   CORE: ["Weight", "Body Fat %", "Caloric Intake"],

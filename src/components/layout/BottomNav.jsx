@@ -16,6 +16,7 @@ const MORE_ITEMS = [
   { to: "/video", label: "Video Editing", icon: "🎬" },
   { to: "/sidehustle", label: "Side Hustle", icon: "💡" },
   { to: "/hobbies", label: "Hobbies", icon: "🎨" },
+  { to: "/diet",    label: "Diet",    icon: "🥗" },
   { to: "/analytics", label: "Analytics", icon: "📈" },
   { to: "/tasks", label: "Manage Tasks", icon: "⚙️" },
 ];

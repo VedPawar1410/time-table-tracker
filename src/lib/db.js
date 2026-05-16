@@ -455,6 +455,88 @@ export async function deleteProgressPhoto(id, storagePath) {
   if (error) throw error;
 }
 
+// ─── Diet ─────────────────────────────────────────────────────────────────────
+
+export async function getDietLogsForDate(userId, date) {
+  const { data, error } = await supabase
+    .from("diet_logs")
+    .select("*, diet_items(*)")
+    .eq("user_id", userId)
+    .eq("log_date", date)
+    .order("sort_order");
+  if (error) throw error;
+  return data;
+}
+
+export async function getDietLogsForRange(userId, startDate, endDate) {
+  const { data, error } = await supabase
+    .from("diet_logs")
+    .select("log_date, diet_items(calories, protein_g, carbs_g, fat_g)")
+    .eq("user_id", userId)
+    .gte("log_date", startDate)
+    .lte("log_date", endDate)
+    .order("log_date");
+  if (error) throw error;
+  return data;
+}
+
+export async function createMeal(userId, { log_date, meal_type, meal_time, sort_order }) {
+  const { data, error } = await supabase
+    .from("diet_logs")
+    .insert({ user_id: userId, log_date, meal_type, meal_time, sort_order })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateMealTime(mealId, meal_time) {
+  const { error } = await supabase.from("diet_logs").update({ meal_time }).eq("id", mealId);
+  if (error) throw error;
+}
+
+export async function updateMealSortOrder(mealId, sort_order) {
+  const { error } = await supabase.from("diet_logs").update({ sort_order }).eq("id", mealId);
+  if (error) throw error;
+}
+
+export async function deleteMeal(mealId) {
+  const { error } = await supabase.from("diet_logs").delete().eq("id", mealId);
+  if (error) throw error;
+}
+
+export async function addFoodItem(userId, mealId, nutrition) {
+  const { food_name, weight_g, calories, protein_g, carbs_g, fat_g, raw_api_data } = nutrition;
+  const { data, error } = await supabase
+    .from("diet_items")
+    .insert({ user_id: userId, meal_id: mealId, food_name, weight_g, calories, protein_g, carbs_g, fat_g, raw_api_data })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteFoodItem(itemId) {
+  const { error } = await supabase.from("diet_items").delete().eq("id", itemId);
+  if (error) throw error;
+}
+
+export async function uploadFoodPhoto(userId, mealId, itemId, file) {
+  const ext = file.name.split(".").pop();
+  const path = `${userId}/${mealId}/${itemId}.${ext}`;
+  const { error: upErr } = await supabase.storage
+    .from("diet-photos")
+    .upload(path, file, { upsert: true });
+  if (upErr) throw upErr;
+  const { data: urlData } = supabase.storage.from("diet-photos").getPublicUrl(path);
+  const { error } = await supabase
+    .from("diet_items")
+    .update({ photo_storage_path: path })
+    .eq("id", itemId);
+  if (error) throw error;
+  return { path, publicUrl: urlData.publicUrl };
+}
+
 // ─── Analytics ────────────────────────────────────────────────────────────────
 
 export async function getHeatmapData(userId, year) {

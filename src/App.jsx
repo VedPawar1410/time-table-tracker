@@ -16,6 +16,7 @@ import HobbiesPage from "./pages/hobbies/HobbiesPage.jsx";
 import AnalyticsPage from "./pages/analytics/AnalyticsPage.jsx";
 import ManageTasksPage from "./pages/custom/ManageTasksPage.jsx";
 import CustomTaskPage from "./pages/custom/CustomTaskPage.jsx";
+import DietPage from "./pages/diet/DietPage.jsx";
 
 export default function App() {
   return (
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="/analytics"   element={<AnalyticsPage />} />
         <Route path="/tasks"       element={<ManageTasksPage />} />
         <Route path="/tasks/:key"  element={<CustomTaskPage />} />
+        <Route path="/diet"        element={<DietPage />} />
       </Route>
     </Routes>
   );
