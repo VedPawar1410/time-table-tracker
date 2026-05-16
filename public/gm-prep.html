@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GM Automation Controls – 2-Month Prep Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181c;
+    --surface2: #1e2026;
+    --border: #2a2d35;
+    --accent: #e8b84b;
+    --accent2: #4b9ce8;
+    --accent3: #4be8a0;
+    --accent4: #e84b6e;
+    --text: #e8e9eb;
+    --muted: #7a7d88;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 2.5rem 2rem 2rem;
+    background: var(--surface);
+  }
+  .header-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    max-width: 680px;
+  }
+  .stats-bar {
+    display: flex;
+    gap: 2rem;
+    padding: 1.25rem 2rem;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
+  .stat-val { font-family: var(--mono); font-size: 15px; font-weight: 500; color: var(--accent); }
+  .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .card-accent-amber { border-left: 3px solid var(--accent); }
+  .card-accent-blue { border-left: 3px solid var(--accent2); }
+  .card-accent-green { border-left: 3px solid var(--accent3); }
+  .card-accent-red { border-left: 3px solid var(--accent4); }
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .pill-amber { background: rgba(232,184,75,0.12); color: var(--accent); border: 1px solid rgba(232,184,75,0.25); }
+  .pill-blue { background: rgba(75,156,232,0.12); color: var(--accent2); border: 1px solid rgba(75,156,232,0.25); }
+  .pill-green { background: rgba(75,232,160,0.12); color: var(--accent3); border: 1px solid rgba(75,232,160,0.25); }
+  .pill-red { background: rgba(232,75,110,0.12); color: var(--accent4); border: 1px solid rgba(232,75,110,0.25); }
+  .pill-gray { background: rgba(122,125,136,0.12); color: var(--muted); border: 1px solid rgba(122,125,136,0.25); }
+  h2 { font-size: 17px; font-weight: 600; margin-bottom: 0.5rem; }
+  h3 { font-size: 14px; font-weight: 500; margin-bottom: 0.5rem; }
+  p { color: var(--muted); font-size: 13px; margin-bottom: 0.5rem; }
+  .month-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border: none;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+    cursor: pointer;
+    border-right: 1px solid var(--border);
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .tab-btn:last-child { border-right: none; }
+  .tab-btn.active { background: var(--accent); color: #0e0f11; font-weight: 600; }
+  .tab-btn:hover:not(.active) { background: var(--surface2); color: var(--text); }
+  .month-panel { display: none; }
+  .month-panel.active { display: block; }
+  .week-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+  }
+  .week-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1.25rem;
+    cursor: pointer;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+  }
+  .week-header:hover { background: var(--surface); }
+  .week-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    min-width: 56px;
+    letter-spacing: 1px;
+  }
+  .week-title { font-size: 13px; font-weight: 500; flex: 1; }
+  .week-hours {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .chevron { font-size: 12px; color: var(--muted); transition: transform 0.2s; }
+  .week-body { padding: 1.25rem; display: none; }
+  .week-body.open { display: block; }
+  .week-body.open + .week-header .chevron,
+  .week-header.open .chevron { transform: rotate(180deg); }
+  .topic-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .topic-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.875rem 1rem;
+  }
+  .topic-block h4 {
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+  .topic-block ul {
+    list-style: none;
+    padding: 0;
+  }
+  .topic-block li {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 2px 0;
+    padding-left: 12px;
+    position: relative;
+  }
+  .topic-block li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+  .resources-list { list-style: none; padding: 0; }
+  .resources-list li {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .resources-list li:last-child { border-bottom: none; }
+  .res-type {
+    font-family: var(--mono);
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .res-free { background: rgba(75,232,160,0.1); color: var(--accent3); border: 1px solid rgba(75,232,160,0.2); }
+  .res-paid { background: rgba(232,184,75,0.1); color: var(--accent); border: 1px solid rgba(232,184,75,0.2); }
+  .res-yt { background: rgba(232,75,110,0.1); color: var(--accent4); border: 1px solid rgba(232,75,110,0.2); }
+  .deliverable-box {
+    background: rgba(75,232,160,0.05);
+    border: 1px solid rgba(75,232,160,0.2);
+    border-radius: 6px;
+    padding: 0.875rem 1rem;
+    margin-top: 0.75rem;
+  }
+  .deliverable-box h4 {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .deliverable-box p { font-size: 12px; margin: 0; }
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin: 1rem 0;
+  }
+  .sched-day {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 6px;
+    text-align: center;
+    font-size: 11px;
+  }
+  .sched-day.weekend {
+    border-color: rgba(232,184,75,0.3);
+    background: rgba(232,184,75,0.06);
+  }
+  .sched-day .day-name {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .sched-day .hrs {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .sched-day.weekend .hrs { color: var(--accent); }
+  .sched-day .activity {
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .project-timeline {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  .project-timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 1.25rem;
+    padding-left: 1rem;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -1.5rem;
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .timeline-item.blue::before { background: var(--accent2); }
+  .timeline-item.green::before { background: var(--accent3); }
+  .timeline-item h4 { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+  .timeline-item p { font-size: 12px; }
+  .skill-matrix {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin: 0.75rem 0;
+  }
+  .skill-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .skill-name { font-size: 12px; color: var(--text); }
+  .skill-bar {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .skill-fill { height: 100%; border-radius: 2px; }
+  .bar-amber { background: var(--accent); }
+  .bar-blue { background: var(--accent2); }
+  .bar-green { background: var(--accent3); }
+  .skill-note { font-size: 10px; color: var(--muted); font-family: var(--mono); }
+  .interview-q {
+    background: var(--surface2);
+    border-left: 2px solid var(--accent2);
+    padding: 0.75rem 1rem;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 0.5rem;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 600px) {
+    .two-col { grid-template-columns: 1fr; }
+    .topic-grid { grid-template-columns: 1fr; }
+    .skill-matrix { grid-template-columns: 1fr; }
+    .schedule-grid { grid-template-columns: repeat(4, 1fr); }
+    .stats-bar { gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-tag">// GM Bangalore · Automation Controls Engineer · Prep Plan</div>
+  <h1>Your 2-Month Roadmap to GM</h1>
+  <p>A structured, week-by-week preparation guide for a fresher targeting GM's automation controls role — covering PLC, SCADA, Python analytics, and data visualization.</p>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><span class="stat-label">Timeline</span><span class="stat-val">2–3 months</span></div>
+  <div class="stat"><span class="stat-label">Weekday hours</span><span class="stat-val">1 hr / day</span></div>
+  <div class="stat"><span class="stat-label">Weekend hours</span><span class="stat-val">2 hrs / day</span></div>
+  <div class="stat"><span class="stat-label">Total hours</span><span class="stat-val">~100 hrs</span></div>
+  <div class="stat"><span class="stat-label">Target level</span><span class="stat-val">Informed fresher</span></div>
+  <div class="stat"><span class="stat-label">Your experience at apply</span><span class="stat-val">~6 months</span></div>
+</div>
+
+<div class="container">
+
+  <!-- SECTION: What is this job -->
+  <div class="section-label">01 · What this job actually is</div>
+
+  <div class="card card-accent-amber" style="margin-bottom:0.75rem;">
+    <div class="pill pill-amber">Role Overview</div>
+    <h2>Automation Controls Engineer — Manufacturing &amp; Assembly</h2>
+    <p style="margin-bottom:0.75rem;">This is a manufacturing-floor engineering role at GM's Technical Center India (GMTCI) in Bangalore. You will not be writing web apps or backend services. Your job is to make <strong style="color:var(--text);">physical machines on a factory floor behave correctly</strong> — and when they don't, figure out why.</p>
+    <div class="two-col">
+      <div>
+        <h3 style="color:var(--text); margin-bottom:0.5rem;">Day-to-day work involves:</h3>
+        <ul class="resources-list">
+          <li><span class="res-type res-free">CORE</span>Programming and maintaining PLCs that control assembly line machines</li>
+          <li><span class="res-type res-free">CORE</span>Monitoring SCADA/HMI dashboards for faults and production data</li>
+          <li><span class="res-type res-free">CORE</span>Working on GPS (General Purpose Stations) and CNC equipment</li>
+          <li><span class="res-type res-free">CORE</span>Parsing data from factory floor devices and surfacing it in reports</li>
+          <li><span class="res-type res-free">CORE</span>Coordinating with plant teams on project rollouts and maintenance</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="color:var(--text); margin-bottom:0.5rem;">Why your software background helps:</h3>
+        <ul class="resources-list">
+          <li><span class="res-type res-blue" style="background:rgba(75,156,232,0.1);color:var(--accent2);border:1px solid rgba(75,156,232,0.2);">EDGE</span>PLC programming IS programming — logic, loops, states, conditions</li>
+          <li><span class="res-type res-blue" style="background:rgba(75,156,232,0.1);color:var(--accent2);border:1px solid rgba(75,156,232,0.2);">EDGE</span>Python for data parsing is something most controls engineers don't know</li>
+          <li><span class="res-type res-blue" style="background:rgba(75,156,232,0.1);color:var(--accent2);border:1px solid rgba(75,156,232,0.2);">EDGE</span>Dashboarding with Power BI / Tableau is a differentiator in this field</li>
+          <li><span class="res-type res-blue" style="background:rgba(75,156,232,0.1);color:var(--accent2);border:1px solid rgba(75,156,232,0.2);">EDGE</span>Version control, documentation habits, structured thinking</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-accent-blue" style="margin-bottom:1.5rem;">
+    <div class="pill pill-blue">What GM expects at your level</div>
+    <h2>You're not expected to be a professional. You ARE expected to show this:</h2>
+    <div class="two-col" style="margin-top:0.75rem;">
+      <div class="topic-block">
+        <h4>✓ Must demonstrate</h4>
+        <ul>
+          <li>Conceptual clarity on what PLCs do and why</li>
+          <li>You've actually written ladder logic, even simulated</li>
+          <li>Understanding of automotive manufacturing context</li>
+          <li>Python competency — pandas, data parsing, visualisation</li>
+          <li>Basic Power BI or Tableau dashboard you built</li>
+          <li>Passion — you learned this on your own time</li>
+          <li>Ability to communicate technical ideas clearly</li>
+        </ul>
+      </div>
+      <div class="topic-block">
+        <h4>✗ You will NOT be judged on</h4>
+        <ul>
+          <li>Years of hands-on PLC field experience</li>
+          <li>Knowing all of GM's proprietary standards</li>
+          <li>Deep CNC or robotics expertise</li>
+          <li>Having worked in a physical plant</li>
+          <li>Certifications from Rockwell or Siemens</li>
+          <li>Production line architecture expertise</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: Weekly Schedule -->
+  <div class="section-label">02 · Your weekly study structure</div>
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="pill pill-gray">Time allocation</div>
+    <p style="margin-bottom:0.75rem;">You have 9 hours/week total. Here's how to use them:</p>
+    <div class="schedule-grid">
+      <div class="sched-day">
+        <div class="day-name">Mon</div>
+        <div class="hrs">1h</div>
+        <div class="activity">Concept study</div>
+      </div>
+      <div class="sched-day">
+        <div class="day-name">Tue</div>
+        <div class="hrs">1h</div>
+        <div class="activity">Video / tutorial</div>
+      </div>
+      <div class="sched-day">
+        <div class="day-name">Wed</div>
+        <div class="hrs">1h</div>
+        <div class="activity">Hands-on practice</div>
+      </div>
+      <div class="sched-day">
+        <div class="day-name">Thu</div>
+        <div class="hrs">1h</div>
+        <div class="activity">Project work</div>
+      </div>
+      <div class="sched-day">
+        <div class="day-name">Fri</div>
+        <div class="hrs">1h</div>
+        <div class="activity">Review + notes</div>
+      </div>
+      <div class="sched-day weekend">
+        <div class="day-name">Sat</div>
+        <div class="hrs">2h</div>
+        <div class="activity">Deep dive / project</div>
+      </div>
+      <div class="sched-day weekend">
+        <div class="day-name">Sun</div>
+        <div class="hrs">2h</div>
+        <div class="activity">Build + document</div>
+      </div>
+    </div>
+    <p style="font-size:12px; color:var(--muted);">Total: 9 hrs/week × 10 weeks = ~90 hrs of focused study. That's enough to build genuine understanding across all pillars.</p>
+  </div>
+
+  <!-- SECTION: Month-by-month roadmap -->
+  <div class="section-label">03 · Month-by-month roadmap</div>
+
+  <div class="month-tabs">
+    <button class="tab-btn active" onclick="switchTab('m1')">Month 1 — Foundations</button>
+    <button class="tab-btn" onclick="switchTab('m2')">Month 2 — Depth + Data</button>
+    <button class="tab-btn" onclick="switchTab('m3')">Month 3 — Project + Interview</button>
+  </div>
+
+  <!-- MONTH 1 -->
+  <div class="month-panel active" id="m1">
+    <div class="card" style="margin-bottom:0.75rem; background:rgba(232,184,75,0.04); border-color:rgba(232,184,75,0.2);">
+      <h3 style="color:var(--accent);">Goal for Month 1</h3>
+      <p>Build your conceptual foundation in PLC, industrial automation, and manufacturing processes. Install the software, write your first ladder logic programs, and get comfortable with the vocabulary of this industry.</p>
+    </div>
+
+    <!-- Week 1 -->
+    <div class="week-row">
+      <div class="week-header" onclick="toggleWeek(this)">
+        <span class="week-num">Week 01</span>
+        <span class="week-title">PLC Fundamentals + Industrial Automation Overview</span>
+        <span class="week-hours">9 hrs</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="week-body">
+        <div class="topic-grid">
+          <div class="topic-block">
+            <h4>Concepts to understand</h4>
+            <ul>
+              <li>What is a PLC and why it exists</li>
+              <li>How PLCs differ from regular computers</li>
+              <li>Scan cycle: Input → Logic → Output</li>
+              <li>Digital vs analog I/O signals</li>
+              <li>Relay ladder logic basics (NO, NC contacts)</li>
+              <li>Coils, timers, counters</li>
+              <li>What is IEC 61131-3 standard</li>
+            </ul>
+          </div>
+          <div class="topic-block">
+            <h4>Industry context to learn</h4>
+            <ul>
+              <li>How automotive assembly lines work</li>
+              <li>What is powertrain manufacturing</li>
+              <li>Body-in-White (BIW) process basics</li>
+              <li>What GPS stations do in a GM plant</li>
+              <li>Role of automation vs manual labor</li>
+              <li>OT vs IT in a factory setting</li>
+            </ul>
+          </div>
+        </div>
+        <h3 style="font-size:12px; color:var(--muted); margin-bottom:0.5rem;">RESOURCES</h3>
+        <ul class="resources-list">
+          <li><span class="res-type res-yt">YouTube</span>RealPars – "What is a PLC?" series (free, ~2 hrs total, best starter)</li>
+          <li><span class="res-type res-free">FREE</span>PLCprogramming.io – read the "Beginner's Guide" article section</li>
+          <li><span class="res-type res-yt">YouTube</span>"How Car Assembly Lines Work" – HowStuffWorks / Smithsonian</li>
+          <li><span class="res-type res-free">FREE</span>Rockwell Automation's FactoryTalk Learning Center (free account)</li>
+          <li><span class="res-type res-free">FREE</span>Wikipedia: Ladder logic, IEC 61131-3 – just read, don't go deep yet</li>
+        </ul>
+        <div class="deliverable-box">
+          <h4>✓ Week 1 deliverable</h4>
+          <p>Write 3 sentences in plain English explaining: what a PLC does, what a scan cycle is, and how an automotive assembly line uses PLCs. If you can explain it simply, you understand it.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 2 -->
+    <div class="week-row">
+      <div class="week-header" onclick="toggleWeek(this)">
+        <span class="week-num">Week 02</span>
+        <span class="week-title">Rockwell/Allen-Bradley — Your First Ladder Logic Programs</span>
+        <span class="week-hours">9 hrs</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="week-body">
+        <div class="topic-grid">
+          <div class="topic-block">
+            <h4>Software to install</h4>
+            <ul>
+              <li>RSLogix 500 — FREE download from Rockwell site</li>
+              <li>RSLogix Emulate 500 — FREE simulator</li>
+              <li>OR: OpenPLC Runtime — free, open source</li>
+              <li>CODESYS — free IDE for IEC 61131-3</li>
+              <li>Studio 5000 — 90-day trial available</li>
+            </ul>
+          </div>
+          <div class="topic-block">
+            <h4>Programs to write</h4>
+            <ul>
+              <li>Motor Start/Stop control (basic latch)</li>
+              <li>Timer-based conveyor sequence</li>
+              <li>Counter for part counting</li>
+              <li>Emergency stop circuit logic</li>
+              <li>Traffic light sequence (3 states)</li>
+            </ul>
+          </div>
+        </div>
+        <h3 style="font-size:12px; color:var(--muted); margin-bottom:0.5rem;">RESOURCES</h3>
+        <ul class="resources-list">
+          <li><span class="res-type res-yt">YouTube</span>SolisPlc.com – free Allen Bradley ladder logic tutorial series (highly recommended)</li>
+          <li><span class="res-type res-yt">YouTube</span>"PLC Motor Start Stop" – search on YouTube, pick any with 100k+ views</li>
+          <li><span class="res-type res-free">FREE</span>OpenPLC Editor + Runtime — openplcproject.com (free, runs on Windows/Linux)</li>
+          <li><span class="res-type res-free">FREE</span>myPLCtraining.com – free beginner content on Allen Bradley</li>
+          <li><span class="res-type res-paid">BOOK</span>"Learning RSLogix 5000 Programming" – Austin Scott (Amazon ~₹2000)</li>
+        </ul>
+        <div class="deliverable-box">
+          <h4>✓ Week 2 deliverable</h4>
+          <p>Screenshot or screen-record your motor start/stop program running in a simulator. Save it — this is evidence for your resume and portfolio.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 3 -->
+    <div class="week-row">
+      <div class="week-header" onclick="toggleWeek(this)">
+        <span class="week-num">Week 03</span>
+        <span class="week-title">HMI, SCADA, and Industrial Networks</span>
+        <span class="week-hours">9 hrs</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="week-body">
+        <div class="topic-grid">
+          <div class="topic-block">
+            <h4>HMI / SCADA concepts</h4>
+            <ul>
+              <li>What is an HMI and who uses it</li>
+              <li>Difference: HMI vs SCADA vs DCS</li>
+              <li>Siemens WinCC / TIA Portal basics</li>
+              <li>FactoryTalk View (Rockwell HMI)</li>
+              <li>Alarm management in HMIs</li>
+              <li>Tag databases and data linking to PLC</li>
+            </ul>
+          </div>
+          <div class="topic-block">
+            <h4>Industrial networking</h4>
+            <ul>
+              <li>EtherNet/IP (Rockwell standard)</li>
+              <li>Modbus TCP/RTU basics</li>
+              <li>PROFINET (Siemens standard)</li>
+              <li>OPC UA — the data highway of Industry 4.0</li>
+              <li>DeviceNet, ControlNet concepts</li>
+              <li>How PLC talks to SCADA</li>
+            </ul>
+          </div>
+        </div>
+        <h3 style="font-size:12px; color:var(--muted); margin-bottom:0.5rem;">RESOURCES</h3>
+        <ul class="resources-list">
+          <li><span class="res-type res-yt">YouTube</span>RealPars – SCADA, HMI, and Industrial Networking playlists (free)</li>
+          <li><span class="res-type res-free">FREE</span>Inductive Automation's Ignition (SCADA) – free trial + free Udemy course</li>
+          <li><span class="res-type res-free">FREE</span>OPC Foundation – opcfoundation.org (read the intro pages on OPC UA)</li>
+          <li><span class="res-type res-yt">YouTube</span>Automation Professionals YT – EtherNet/IP and Modbus explained</li>
+          <li><span class="res-type res-free">FREE</span>Siemens TIA Portal 90-day trial — downloadable from Siemens website</li>
+        </ul>
+        <div class="deliverable-box">
+          <h4>✓ Week 3 deliverable</h4>
+          <p>Draw a diagram (even in Paint or draw.io) of a simple plant floor network: a PLC connected to an HMI via EtherNet/IP, and to a SCADA server via OPC UA. Label each component and connection. This shows systems thinking.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 4 -->
+    <div class="week-row">
+      <div class="week-header" onclick="toggleWeek(this)">
+        <span class="week-num">Week 04</span>
+        <span class="week-title">GM-Specific Technology: Rockwell, Siemens, Fanuc + CNC Basics</span>
+        <span class="week-hours">9 hrs</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="week-body">
+        <div class="topic-grid">
+          <div class="topic-block">
+            <h4>Rockwell (Allen-Bradley) specifics</h4>
+            <ul>
+              <li>ControlLogix vs CompactLogix platforms</li>
+              <li>Studio 5000 Logix Designer interface</li>
+              <li>Add-On Instructions (AOI) concept</li>
+              <li>Produced/Consumed Tags for PLC-to-PLC comm</li>
+              <li>Why GM uses Rockwell as standard</li>
+            </ul>
+          </div>
+          <div class="topic-block">
+            <h4>Fanuc + CNC basics</h4>
+            <ul>
+              <li>What CNC stands for and how it works</li>
+              <li>G-code basics (just read, don't memorize)</li>
+              <li>Fanuc robot programming concepts (ROBOGUIDE)</li>
+              <li>Difference: CNC machine vs PLC-controlled machine</li>
+              <li>How GM uses Fanuc in welding / painting</li>
+            </ul>
+          </div>
+        </div>
+        <h3 style="font-size:12px; color:var(--muted); margin-bottom:0.5rem;">RESOURCES</h3>
+        <ul class="resources-list">
+          <li><span class="res-type res-yt">YouTube</span>Rockwell Automation official YouTube channel – Studio 5000 overview videos</li>
+          <li><span class="res-type res-free">FREE</span>Rockwell FactoryTalk Learning Center – free online courses (make a free account)</li>
+          <li><span class="res-type res-yt">YouTube</span>"Fanuc Robot Programming for Beginners" – multiple tutorial channels</li>
+          <li><span class="res-type res-yt">YouTube</span>NYC CNC – best YouTube channel for CNC/G-code beginner understanding</li>
+          <li><span class="res-type res-free">FREE</span>Fanuc ROBOGUIDE trial – download from fanucrobotics.com (simulate robot programs)</li>
+        </ul>
+        <div class="deliverable-box">
+          <h4>✓ Week 4 deliverable</h4>
+          <p>Write a one-page note (personal study notes format) on: the difference between ControlLogix and CompactLogix, what EtherNet/IP is, and where Fanuc is used in automotive manufacturing. This note becomes interview preparation material.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MONTH 2 -->
+  <div class="month-panel" id="m2">
+    <div class="card" style="margin-bottom:0.75rem; background:rgba(75,156,232,0.04); border-color:rgba(75,156,232,0.2);">
+      <h3 style="color:var(--accent2);">Goal for Month 2</h3>
+      <p>Shift into data and analytics skills — Python for manufacturing data parsing, Power BI and Tableau dashboards, and a deeper look at how GM's controls ecosystem works at the data level. Start connecting your software background to this domain.</p>
+    </div>
+
+    <!-- Week 5 -->
+    <div class="week-row">
+      <div class="week-header" onclick="toggleWeek(this)">
+        <span class="week-num">Week 05</span>
+        <span class="week-title">Python for Manufacturing — Data Parsing + OPC UA</span>
+        <span class="week-hours">9 hrs</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="week-body">
+        <div class="topic-grid">
+          <div class="topic-block">
+            <h4>Python skills to build / refresh</h4>
+            <ul>
+              <li>pandas: read CSV, filter, group, aggregate</li>
+              <li>numpy: basic array operations</li>
+              <li>matplotlib / plotly: time-series charts</li>
+              <li>Reading structured data from machines</li>
+              <li>Parsing CSV logs from PLC/SCADA exports</li>
+              <li>Detecting anomalies in sensor data</li>
+            </ul>
+          </div>
+          <div class="topic-block">
+            <h4>Industrial Python libraries</h4>
+            <ul>
+              <li>pymodbus — read Modbus device data</li>
+              <li>opcua — OPC UA client in Python</li>
+              <li>snap7 — connect Python to Siemens S7 PLC</li>
+              <li>pyserial — serial communication</li>
+              <li>Flask/Streamlit — quick dashboard</li>
+              <li>SQLite — storing manufacturing logs</li>
+            </ul>
+          </div>
+        </div>
+        <h3 style="font-size:12px; color:var(--muted); margin-bottom:0.5rem;">RESOURCES</h3>
+        <ul class="resources-list">
+          <li><span class="res-type res-free">FREE</span>controlbyte.tech/blog/python-for-industrial-automation/ — best practical guide</li>
+          <li><span class="res-type res-free">FREE</span>Kaggle – Bosch Production Line Performance dataset (free, real automotive data)</li>
+          <li><span class="res-type res-yt">YouTube</span>Corey Schafer – pandas tutorial series (the gold standard for beginners)</li>
+          <li><span class="res-type res-free">FREE</span>opcfoundation.org + python-opcua library docs on GitHub</li>
+          <li><span class="res-type res-free">FREE</span>Streamlit.io – build a dashboard with 30 lines of Python</li>
+        </ul>
+        <div class="deliverable-box">
+          <h4>✓ Week 5 deliverable</h4>
+          <p>Download the Bosch Production Line dataset from Kaggle. Write a Python script that loads it, finds the top 5 failure-prone stations, and plots a bar chart. Save the code on GitHub — this is your first portfolio item.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 6 -->
+    <div class="week-row">
+      <div class="week-header" onclick="toggleWeek(this)">
+        <span class="week-num">Week 06</span>
+        <span class="week-title">Power BI + Tableau — Manufacturing Dashboards</span>
+        <span class="week-hours">9 hrs</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="week-body">
+        <div class="topic-grid">
+          <div class="topic-block">
+            <h4>Power BI concepts</h4>
+            <ul>
+              <li>Import data from CSV, Excel, databases</li>
+              <li>Power Query for data transformation</li>
+              <li>DAX basics — calculated columns, measures</li>
+              <li>OEE (Overall Equipment Effectiveness) KPI</li>
+              <li>Creating a manufacturing floor dashboard</li>
+              <li>Publishing to Power BI Service (free)</li>
+            </ul>
+          </div>
+          <div class="topic-block">
+            <h4>Manufacturing KPIs to visualise</h4>
+            <ul>
+              <li>OEE = Availability × Performance × Quality</li>
+              <li>Mean Time Between Failures (MTBF)</li>
+              <li>Mean Time To Repair (MTTR)</li>
+              <li>Cycle time vs takt time</li>
+              <li>First-pass yield (FPY)</li>
+              <li>Downtime reasons by category</li>
+            </ul>
+          </div>
+        </div>
+        <h3 style="font-size:12px; color:var(--muted); margin-bottom:0.5rem;">RESOURCES</h3>
+        <ul class="resources-list">
+          <li><span class="res-type res-free">FREE</span>Microsoft Power BI Desktop — free download, no subscription needed</li>
+          <li><span class="res-type res-yt">YouTube</span>Guy in a Cube – best Power BI YouTube channel for beginners</li>
+          <li><span class="res-type res-free">FREE</span>Tableau Public — free version, publish dashboards publicly for portfolio</li>
+          <li><span class="res-type res-yt">YouTube</span>Tableau Tim on YouTube – beginner Tableau tutorials</li>
+          <li><span class="res-type res-free">FREE</span>Microsoft Learn – Power BI learning paths (free, structured)</li>
+        </ul>
+        <div class="deliverable-box">
+          <h4>✓ Week 6 deliverable</h4>
+          <p>Build a Power BI dashboard using the Bosch dataset (or any manufacturing CSV you find on Kaggle). Include: OEE calculation, downtime by station bar chart, trend line over time. Publish to Power BI Service or Tableau Public. This link goes on your resume.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 7 -->
+    <div class="week-row">
+      <div class="week-header" onclick="toggleWeek(this)">
+        <span class="week-num">Week 07</span>
+        <span class="week-title">Automation Architecture + GM Standards Deep Dive</span>
+        <span class="week-hours">9 hrs</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="week-body">
+        <div class="topic-grid">
+          <div class="topic-block">
+            <h4>Architecture concepts</h4>
+            <ul>
+              <li>ISA-95 plant hierarchy (Level 0–4)</li>
+              <li>Field level → Control level → MES → ERP</li>
+              <li>What a Manufacturing Execution System does</li>
+              <li>Edge computing in smart factories</li>
+              <li>Industry 4.0 pillars (IoT, Big Data, AI)</li>
+              <li>Digital Twin concept basics</li>
+            </ul>
+          </div>
+          <div class="topic-block">
+            <h4>GM-specific standards</h4>
+            <ul>
+              <li>GM Common Controls Standards (GMCCS)</li>
+              <li>GM Global Manufacturing System (GMS)</li>
+              <li>Andon systems in GM plants</li>
+              <li>GM's use of eMaintenance tools</li>
+              <li>Safety: LOTO, machine guarding, E-stops</li>
+              <li>Quality gates in automotive assembly</li>
+            </ul>
+          </div>
+        </div>
+        <h3 style="font-size:12px; color:var(--muted); margin-bottom:0.5rem;">RESOURCES</h3>
+        <ul class="resources-list">
+          <li><span class="res-type res-free">FREE</span>ISA.org – search "ISA-95" for the standard overview (free intro articles)</li>
+          <li><span class="res-type res-yt">YouTube</span>"Industry 4.0 explained" – DHL / SAP overview videos (clear visual explainers)</li>
+          <li><span class="res-type res-free">FREE</span>GM Sustainability Report + GMTCI About pages — understand their language</li>
+          <li><span class="res-type res-yt">YouTube</span>"How General Motors Manufactures Cars" – GM official channel</li>
+          <li><span class="res-type res-free">FREE</span>LinkedIn Learning – "Lean Manufacturing" (free 1-month trial)</li>
+        </ul>
+        <div class="deliverable-box">
+          <h4>✓ Week 7 deliverable</h4>
+          <p>Draw the ISA-95 5-level plant hierarchy, and map GM's specific tools to each level (e.g. Rockwell PLC at Level 1, SCADA at Level 2, MES at Level 3). This shows strategic understanding, not just technical knowledge.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 8 -->
+    <div class="week-row">
+      <div class="week-header" onclick="toggleWeek(this)">
+        <span class="week-num">Week 08</span>
+        <span class="week-title">Structured Text + Advanced PLC + Drives Basics</span>
+        <span class="week-hours">9 hrs</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="week-body">
+        <div class="topic-grid">
+          <div class="topic-block">
+            <h4>PLC programming — go deeper</h4>
+            <ul>
+              <li>Structured Text (ST) — the Python of PLCs</li>
+              <li>Function Block Diagram (FBD)</li>
+              <li>Sequential Function Chart (SFC)</li>
+              <li>PID control basics — proportional, integral, derivative</li>
+              <li>Motion control concepts</li>
+              <li>Data logging from PLC to historian</li>
+            </ul>
+          </div>
+          <div class="topic-block">
+            <h4>Drives and electrical basics</h4>
+            <ul>
+              <li>Variable Frequency Drive (VFD) — what it does</li>
+              <li>Servo motor vs stepper motor</li>
+              <li>Reading electrical diagrams (P&IDs)</li>
+              <li>Sensors: proximity, photoelectric, vision</li>
+              <li>PowerFlex 525 drive (Rockwell standard)</li>
+              <li>Safety relays and light curtains</li>
+            </ul>
+          </div>
+        </div>
+        <h3 style="font-size:12px; color:var(--muted); margin-bottom:0.5rem;">RESOURCES</h3>
+        <ul class="resources-list">
+          <li><span class="res-type res-yt">YouTube</span>SolisPlc – Structured Text tutorial (free, beginner friendly)</li>
+          <li><span class="res-type res-free">FREE</span>CODESYS online editor – practise Structured Text in browser, no install</li>
+          <li><span class="res-type res-yt">YouTube</span>RealPars – VFD and servo drive explained series (animated, clear)</li>
+          <li><span class="res-type res-yt">YouTube</span>"How to read P&ID diagrams" – Engineering with Rosie (clear, well paced)</li>
+          <li><span class="res-type res-free">FREE</span>Rockwell PowerFlex 525 User Manual — download free from Rockwell site</li>
+        </ul>
+        <div class="deliverable-box">
+          <h4>✓ Week 8 deliverable</h4>
+          <p>Rewrite your motor start/stop program from Week 2 using Structured Text instead of Ladder Logic. Compare the two. Note: for someone with programming background, Structured Text will feel very natural — this is your bridge moment between IT and OT.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MONTH 3 -->
+  <div class="month-panel" id="m3">
+    <div class="card" style="margin-bottom:0.75rem; background:rgba(75,232,160,0.04); border-color:rgba(75,232,160,0.2);">
+      <h3 style="color:var(--accent3);">Goal for Month 3</h3>
+      <p>Build your capstone project, prepare interview answers, polish your resume, and consolidate everything into a story. The last 2–3 weeks are about converting knowledge into confidence.</p>
+    </div>
+
+    <!-- Week 9 -->
+    <div class="week-row">
+      <div class="week-header" onclick="toggleWeek(this)">
+        <span class="week-num">Week 09</span>
+        <span class="week-title">Build Your Capstone Project — Manufacturing Analytics Dashboard</span>
+        <span class="week-hours">9 hrs</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="week-body">
+        <div class="topic-grid">
+          <div class="topic-block">
+            <h4>Project: "Smart Factory OEE Monitor"</h4>
+            <ul>
+              <li>Simulate PLC/sensor data with Python</li>
+              <li>Parse and clean the data with pandas</li>
+              <li>Calculate OEE, MTBF, MTTR automatically</li>
+              <li>Build a live Streamlit or Power BI dashboard</li>
+              <li>Add anomaly detection (simple threshold alert)</li>
+              <li>Push code to GitHub with a clean README</li>
+            </ul>
+          </div>
+          <div class="topic-block">
+            <h4>What this project proves to GM</h4>
+            <ul>
+              <li>You understand manufacturing KPIs, not just code</li>
+              <li>You can bridge PLC data → actionable insight</li>
+              <li>Python + data analysis applied to their domain</li>
+              <li>Dashboard skills with Power BI or Tableau</li>
+              <li>You took initiative — no one asked you to do this</li>
+              <li>Software dev instincts: Git, README, clean code</li>
+            </ul>
+          </div>
+        </div>
+        <h3 style="font-size:12px; color:var(--muted); margin-bottom:0.5rem;">HOW TO BUILD IT (STEP BY STEP)</h3>
+        <ul class="resources-list">
+          <li><span class="res-type res-free">STEP 1</span>Generate synthetic manufacturing data: machine_id, timestamp, cycle_time, status, defect_flag (Python random/numpy)</li>
+          <li><span class="res-type res-free">STEP 2</span>Write pandas code to compute: availability %, performance %, quality %, OEE score</li>
+          <li><span class="res-type res-free">STEP 3</span>Add downtime categorization: planned, unplanned, changeover, breakdown</li>
+          <li><span class="res-type res-free">STEP 4</span>Build Streamlit dashboard with: OEE gauge, downtime pie chart, trend line, anomaly alerts</li>
+          <li><span class="res-type res-free">STEP 5</span>Import data into Power BI — build a second dashboard there for the "tools" requirement</li>
+          <li><span class="res-type res-free">STEP 6</span>Push to GitHub. Write a README: "What it does, Why I built it, Tech used, How to run it"</li>
+        </ul>
+        <div class="deliverable-box">
+          <h4>✓ Week 9 deliverable</h4>
+          <p>GitHub repo live with project. Screenshots of dashboard ready. 2–3 sentences you can say in an interview: "I built a manufacturing analytics dashboard that simulates factory floor data and calculates OEE — here's the link." That sentence will make interviewers sit up.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 10 -->
+    <div class="week-row">
+      <div class="week-header" onclick="toggleWeek(this)">
+        <span class="week-num">Week 10</span>
+        <span class="week-title">Interview Preparation — Questions, Answers, Resume Polish</span>
+        <span class="week-hours">9 hrs</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="week-body">
+        <h3 style="font-size:12px; color:var(--muted); margin-bottom:0.75rem;">TECHNICAL QUESTIONS YOU WILL LIKELY FACE</h3>
+        <div class="interview-q">What is a PLC and how does its scan cycle work?</div>
+        <div class="interview-q">Explain the difference between Ladder Logic and Structured Text. Which would you prefer and why?</div>
+        <div class="interview-q">What is OPC UA and why is it important in Industry 4.0?</div>
+        <div class="interview-q">What is OEE? How would you calculate it from raw production data?</div>
+        <div class="interview-q">If a machine stops on the line unexpectedly, walk me through how you'd troubleshoot it.</div>
+        <div class="interview-q">How does EtherNet/IP differ from standard Ethernet?</div>
+        <div class="interview-q">What is the ISA-95 model and where does a PLC sit in it?</div>
+        <div class="interview-q">Tell me about a project where you worked with data. What insight did you extract?</div>
+        <div style="margin-top:1rem;">
+          <h3 style="font-size:12px; color:var(--muted); margin-bottom:0.5rem;">BEHAVIOURAL / SITUATIONAL QUESTIONS</h3>
+          <div class="interview-q">Why do you want to move from software development to automation controls?</div>
+          <div class="interview-q">You're a fresher in a plant full of experienced technicians. How do you earn their respect?</div>
+          <div class="interview-q">How do you approach learning something completely new to you?</div>
+        </div>
+        <div class="deliverable-box">
+          <h4>✓ Week 10 deliverable</h4>
+          <p>Write out answers to all 11 questions above. Practice saying them out loud. Record yourself once. Resume updated with: GitHub project link, "PLC Fundamentals (self-studied)", "Manufacturing Analytics (OEE, MTBF)", Power BI / Tableau listed under skills.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 11-12 -->
+    <div class="week-row">
+      <div class="week-header" onclick="toggleWeek(this)">
+        <span class="week-num">Week 11–12</span>
+        <span class="week-title">Buffer + Final Polish + Mock Interviews</span>
+        <span class="week-hours">18 hrs</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="week-body">
+        <div class="topic-grid">
+          <div class="topic-block">
+            <h4>Use this time for</h4>
+            <ul>
+              <li>Revisit any weak area from months 1–2</li>
+              <li>Do 2 mock interviews with friends or mentors</li>
+              <li>Read GM's latest annual report + about GMTCI</li>
+              <li>Follow GM Careers on LinkedIn</li>
+              <li>Polish GitHub project README further</li>
+              <li>Prepare 3 smart questions to ask GM interviewer</li>
+            </ul>
+          </div>
+          <div class="topic-block">
+            <h4>Smart questions to ask GM</h4>
+            <ul>
+              <li>"What's the biggest automation challenge at the Bangalore center right now?"</li>
+              <li>"How is GM applying Industry 4.0 principles to its India operations?"</li>
+              <li>"What does a typical first 6 months look like for someone in this role?"</li>
+              <li>"How does the Bangalore team collaborate with global GM plants?"</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: Skill gaps -->
+  <div class="section-label" style="margin-top:2rem;">04 · Your starting point vs. target level</div>
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="pill pill-gray">Skill self-assessment</div>
+    <p style="margin-bottom:1rem;">Where you should realistically be after 10 weeks of prep — honest, achievable targets.</p>
+    <div class="skill-matrix">
+      <div class="skill-row">
+        <span class="skill-name">PLC Ladder Logic</span>
+        <div class="skill-bar"><div class="skill-fill bar-amber" style="width:40%"></div></div>
+        <span class="skill-note">Target: beginner-functional (write basic programs in simulator)</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">Python for Manufacturing Data</span>
+        <div class="skill-bar"><div class="skill-fill bar-blue" style="width:70%"></div></div>
+        <span class="skill-note">Target: strong (this is your competitive advantage)</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">Power BI / Tableau</span>
+        <div class="skill-bar"><div class="skill-fill bar-blue" style="width:55%"></div></div>
+        <span class="skill-note">Target: can build functional dashboards independently</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">HMI / SCADA concepts</span>
+        <div class="skill-bar"><div class="skill-fill bar-amber" style="width:35%"></div></div>
+        <span class="skill-note">Target: understand, explain, navigate a basic HMI</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">Industrial Networking</span>
+        <div class="skill-bar"><div class="skill-fill bar-amber" style="width:30%"></div></div>
+        <span class="skill-note">Target: explain EtherNet/IP, Modbus, OPC UA confidently</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">Automotive Manufacturing Context</span>
+        <div class="skill-bar"><div class="skill-fill bar-green" style="width:60%"></div></div>
+        <span class="skill-note">Target: know GM's process, vocabulary, and standards</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">CNC / Fanuc Robotics</span>
+        <div class="skill-bar"><div class="skill-fill bar-amber" style="width:20%"></div></div>
+        <span class="skill-note">Target: conceptual only — what they are, where they're used</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">Interview readiness</span>
+        <div class="skill-bar"><div class="skill-fill bar-green" style="width:80%"></div></div>
+        <span class="skill-note">Target: prepared, calm, with a real project to show</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: Capstone project summary -->
+  <div class="section-label">05 · The capstone project — your proof</div>
+  <div class="card card-accent-green" style="margin-bottom:1.5rem;">
+    <div class="pill pill-green">Project: Smart Factory OEE Monitor</div>
+    <h2 style="margin-bottom:0.75rem;">This single project answers 6 of the 8 job requirements</h2>
+    <div class="project-timeline">
+      <div class="timeline-item">
+        <h4>Phase 1 — Simulate factory floor data (Python)</h4>
+        <p>Generate synthetic PLC-like data: machine ID, timestamp, cycle time, fault codes, status flags. Represents requirement #7 (data parsing from manufacturing processes).</p>
+      </div>
+      <div class="timeline-item blue">
+        <h4>Phase 2 — Parse and analyse (pandas + numpy)</h4>
+        <p>Calculate OEE, MTBF, MTTR. Classify downtime. Detect anomalies with simple threshold logic. Represents requirements #6 and #7.</p>
+      </div>
+      <div class="timeline-item green">
+        <h4>Phase 3 — Live dashboard (Streamlit + Power BI)</h4>
+        <p>Streamlit app with real-time charts. Import same data to Power BI for a second, more polished dashboard. Represents requirement #6 (Tableau, Power BI, Python).</p>
+      </div>
+      <div class="timeline-item">
+        <h4>Phase 4 — GitHub + documentation</h4>
+        <p>Clean README with architecture diagram, setup steps, screenshots, and a written paragraph on what insights the data revealed. Shows communication + reporting skills (requirement #5).</p>
+      </div>
+      <div class="timeline-item blue">
+        <h4>Phase 5 — Extend (optional)</h4>
+        <p>Add a simulated Modbus connection (pymodbus) that "polls" fake machine data every 5 seconds. This gets you closest to actual plant floor integration and is a massive talking point in interviews.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: Resume tips -->
+  <div class="section-label">06 · How to frame this on your resume</div>
+  <div class="card" style="margin-bottom:2rem;">
+    <div class="two-col">
+      <div>
+        <div class="pill pill-amber">Skills section — add these</div>
+        <ul class="resources-list" style="margin-top:0.5rem;">
+          <li><span class="res-type res-free">NEW</span>PLC Programming (Ladder Logic, Structured Text) — self-studied</li>
+          <li><span class="res-type res-free">NEW</span>Industrial Automation: SCADA, HMI, OPC UA, EtherNet/IP</li>
+          <li><span class="res-type res-free">NEW</span>Manufacturing Analytics: OEE, MTBF, MTTR</li>
+          <li><span class="res-type res-free">HAVE</span>Python (pandas, numpy, matplotlib, Streamlit)</li>
+          <li><span class="res-type res-free">NEW</span>Power BI, Tableau — dashboard development</li>
+          <li><span class="res-type res-free">HAVE</span>Git / GitHub — version control</li>
+        </ul>
+      </div>
+      <div>
+        <div class="pill pill-blue">Project section — write it like this</div>
+        <div style="background:var(--surface2); border-radius:6px; padding:1rem; margin-top:0.5rem; font-size:12px; color:var(--muted); line-height:1.8;">
+          <span style="color:var(--text); font-weight:500;">Smart Factory OEE Monitor</span><br>
+          Built a Python-based manufacturing analytics system that simulates PLC/sensor data from an automotive assembly line, computes OEE, MTBF, and MTTR, detects anomalies, and visualises KPIs on an interactive Power BI dashboard. Integrated Modbus simulation for live data polling.<br>
+          <span style="color:var(--accent); font-family:var(--mono); font-size:10px;">github.com/yourname/oee-monitor</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.month-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+function toggleWeek(header) {
+  const body = header.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  header.classList.toggle('open', !isOpen);
+}
+</script>
+</body>
+</html>

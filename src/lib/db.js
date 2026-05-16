@@ -595,3 +595,38 @@ export async function getHeatmapData(userId, year) {
   }
   return map;
 }
+
+// ─── Job Prep Daily Logs ──────────────────────────────────────────────────────
+
+export async function getJobPrepDailyLog(userId, date) {
+  const { data, error } = await supabase
+    .from("jobprep_daily_logs")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("log_date", date)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export async function upsertJobPrepDailyLog(userId, date, { duration_min, activities, resources_used, learnings, notes }) {
+  const { error } = await supabase
+    .from("jobprep_daily_logs")
+    .upsert(
+      { user_id: userId, log_date: date, duration_min, activities, resources_used, learnings, notes, updated_at: new Date().toISOString() },
+      { onConflict: "user_id,log_date" }
+    );
+  if (error) throw error;
+}
+
+export async function getJobPrepDailyLogsForRange(userId, startDate, endDate) {
+  const { data, error } = await supabase
+    .from("jobprep_daily_logs")
+    .select("log_date, duration_min, activities")
+    .eq("user_id", userId)
+    .gte("log_date", startDate)
+    .lte("log_date", endDate)
+    .order("log_date");
+  if (error) throw error;
+  return data;
+}
