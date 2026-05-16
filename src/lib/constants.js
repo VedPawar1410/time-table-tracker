@@ -66,3 +66,19 @@ export const DEFAULT_EXERCISES = {
   Cardio: ["Running", "Cycling", "Jump Rope", "HIIT", "Stairmaster", "Elliptical"],
   "Full Body": ["Clean and Press", "Kettlebell Swing", "Burpees", "Thrusters"],
 };
+
+export const MEASUREMENT_METRICS = {
+  CORE: ["Weight", "Body Fat %", "Caloric Intake"],
+  BODY_PART: [
+    "Neck", "Shoulders", "Chest",
+    "Left Bicep", "Right Bicep", "Left Forearm", "Right Forearm",
+    "Upper Abs", "Waist", "Lower Abs", "Hips",
+    "Left Thigh", "Right Thigh", "Left Calf", "Right Calf",
+  ],
+};
+
+export const METRIC_UNITS = {
+  "Weight": "kg",
+  "Body Fat %": "%",
+  "Caloric Intake": "kcal",
+};

@@ -336,6 +336,125 @@ export async function addTaskSession(userId, taskId, session) {
   return data;
 }
 
+// ─── Gym — Extended ───────────────────────────────────────────────────────────
+
+export async function getExerciseHistory(userId, exerciseName) {
+  // Returns the most recent session's sets for a given exercise name
+  const { data, error } = await supabase
+    .from("gym_workouts")
+    .select("log_date, gym_exercises!inner(exercise_name, gym_sets(set_number, reps, weight_kg))")
+    .eq("user_id", userId)
+    .eq("gym_exercises.exercise_name", exerciseName)
+    .order("log_date", { ascending: false })
+    .limit(1);
+  if (error) throw error;
+  if (!data || data.length === 0) return [];
+  const exs = data[0].gym_exercises;
+  if (!exs || exs.length === 0) return [];
+  return exs[0].gym_sets.sort((a, b) => a.set_number - b.set_number);
+}
+
+export async function getGymCalendarData(userId, year, month) {
+  const start = `${year}-${String(month).padStart(2, "0")}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const end = `${year}-${String(month).padStart(2, "0")}-${lastDay}`;
+  const { data, error } = await supabase
+    .from("gym_workouts")
+    .select("log_date, workout_type")
+    .eq("user_id", userId)
+    .gte("log_date", start)
+    .lte("log_date", end);
+  if (error) throw error;
+  const map = {};
+  for (const row of data) {
+    map[row.log_date] = { type: row.workout_type };
+  }
+  return map;
+}
+
+// ─── Body Measurements ────────────────────────────────────────────────────────
+
+export async function getMeasurements(userId, metric) {
+  const { data, error } = await supabase
+    .from("body_measurements")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("metric", metric)
+    .order("log_date", { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
+export async function getAllLatestMeasurements(userId) {
+  const { data, error } = await supabase
+    .from("body_measurements")
+    .select("metric, value_num, unit, log_date")
+    .eq("user_id", userId)
+    .order("log_date", { ascending: false });
+  if (error) throw error;
+  // Keep only the most recent entry per metric
+  const seen = new Set();
+  const latest = [];
+  for (const row of data) {
+    if (!seen.has(row.metric)) {
+      seen.add(row.metric);
+      latest.push(row);
+    }
+  }
+  return latest;
+}
+
+export async function addMeasurement(userId, { log_date, metric, value_num, unit }) {
+  const { data, error } = await supabase
+    .from("body_measurements")
+    .insert({ user_id: userId, log_date, metric, value_num, unit })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteMeasurement(id) {
+  const { error } = await supabase.from("body_measurements").delete().eq("id", id);
+  if (error) throw error;
+}
+
+// ─── Progress Photos ──────────────────────────────────────────────────────────
+
+export async function getProgressPhotos(userId) {
+  const { data, error } = await supabase
+    .from("gym_progress_photos")
+    .select("*")
+    .eq("user_id", userId)
+    .order("photo_date", { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+export async function uploadProgressPhoto(userId, photoDate, file) {
+  const ext = file.name.split(".").pop();
+  const path = `${userId}/${photoDate}.${ext}`;
+  const { error: upErr } = await supabase.storage
+    .from("gym-photos")
+    .upload(path, file, { upsert: true });
+  if (upErr) throw upErr;
+
+  const { data: urlData } = supabase.storage.from("gym-photos").getPublicUrl(path);
+  const { data, error } = await supabase
+    .from("gym_progress_photos")
+    .upsert({ user_id: userId, photo_date: photoDate, storage_path: path }, { onConflict: "user_id,photo_date" })
+    .select()
+    .single();
+  if (error) throw error;
+  return { ...data, public_url: urlData.publicUrl };
+}
+
+export async function deleteProgressPhoto(id, storagePath) {
+  await supabase.storage.from("gym-photos").remove([storagePath]);
+  const { error } = await supabase.from("gym_progress_photos").delete().eq("id", id);
+  if (error) throw error;
+}
+
 // ─── Analytics ────────────────────────────────────────────────────────────────
 
 export async function getHeatmapData(userId, year) {

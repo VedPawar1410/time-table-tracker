@@ -31,3 +31,7 @@ dist-ssr
 *.sw?
 
 Changes_to_make.txt
+
+# Reference images (not needed in repo)
+UI-images/
+Gym-pics/
