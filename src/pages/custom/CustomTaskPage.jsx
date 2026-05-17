@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth.js";
 import { getCustomTasks } from "../../lib/db.js";
 import { GenericTaskPage } from "../GenericTaskPage.jsx";
-import { FONTS } from "../../lib/constants.js";
+import { FONTS, THEME } from "../../lib/constants.js";
 
 export default function CustomTaskPage() {
   const { key } = useParams();
@@ -19,8 +19,8 @@ export default function CustomTaskPage() {
     });
   }, [user?.id, key]);
 
-  if (loading) return <div style={{ padding: 40, textAlign: "center", color: "#4A5568", fontFamily: FONTS.mono, fontSize: 12 }}>Loading...</div>;
-  if (!task) return <div style={{ padding: 40, textAlign: "center", color: "#4A5568" }}>Task not found.</div>;
+  if (loading) return <div style={{ padding: 40, textAlign: "center", color: THEME.inkFaint, fontFamily: FONTS.mono, fontSize: 12 }}>Loading...</div>;
+  if (!task) return <div style={{ padding: 40, textAlign: "center", color: THEME.inkMuted }}>Task not found.</div>;
 
   return (
     <GenericTaskPage

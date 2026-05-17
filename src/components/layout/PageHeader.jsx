@@ -1,19 +1,45 @@
-import { useNavigate } from "react-router-dom";
-import { FONTS } from "../../lib/constants.js";
+import { FONTS, THEME } from "../../lib/constants.js";
 
-export function PageHeader({ title, icon, subtitle, action, accentColor = "#4ADE80" }) {
-  const navigate = useNavigate();
-
+export function PageHeader({ title, icon, subtitle, action, kicker, sticker }) {
   return (
     <div style={{ marginBottom: 24 }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-        <div>
-          {icon && <div style={{ fontSize: 32, marginBottom: 8, lineHeight: 1 }}>{icon}</div>}
-          <h1 style={{ fontFamily: FONTS.syne, fontSize: 28, fontWeight: 800, color: "#E2E8F0", lineHeight: 1.1, letterSpacing: -0.5 }}>
-            {title}
-          </h1>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {kicker && (
+            <div style={{
+              fontFamily: FONTS.mono,
+              fontSize: 9,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: THEME.inkMuted,
+              marginBottom: 6,
+            }}>
+              {kicker}
+            </div>
+          )}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {icon && <span style={{ fontSize: 28, lineHeight: 1 }}>{icon}</span>}
+            <h1 style={{
+              fontFamily: FONTS.nunito,
+              fontSize: 28,
+              fontWeight: 800,
+              color: THEME.ink,
+              lineHeight: 1.1,
+              letterSpacing: -0.3,
+              margin: 0,
+            }}>
+              {title}
+            </h1>
+            {sticker && <span style={{ marginLeft: 4 }}>{sticker}</span>}
+          </div>
           {subtitle && (
-            <p style={{ color: "#3D5068", fontSize: 13, marginTop: 6, lineHeight: 1.6, fontFamily: FONTS.sans }}>
+            <p style={{
+              color: THEME.inkSoft,
+              fontSize: 13,
+              marginTop: 6,
+              lineHeight: 1.6,
+              fontFamily: FONTS.sans,
+            }}>
               {subtitle}
             </p>
           )}

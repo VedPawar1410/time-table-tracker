@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { StatBadge } from "../ui/StatBadge.jsx";
+import CheckBubble from "../ui/CheckBubble.jsx";
 import { GymForm } from "./forms/GymForm.jsx";
 import { JobPrepForm } from "./forms/JobPrepForm.jsx";
 import { BookForm } from "./forms/BookForm.jsx";
 import { SleepForm } from "./forms/SleepForm.jsx";
 import { GenericForm } from "./forms/GenericForm.jsx";
-import { FONTS } from "../../lib/constants.js";
+import { FONTS, THEME } from "../../lib/constants.js";
 
 const FORMS = { gym: GymForm, jobprep: JobPrepForm, book: BookForm, sleep: SleepForm };
 
@@ -19,47 +20,69 @@ export function TaskCard({ task, selectedDate, isDone, getTaskData, toggle, upda
 
   return (
     <div style={{
-      borderRadius: 14, background: done ? task.bg : "#0D1117",
-      border: `1px solid ${done ? task.bd : "#1E293B"}`,
-      overflow: "hidden", transition: "border-color 0.25s, background 0.25s",
+      borderRadius: THEME.rMd,
+      background: THEME.surface,
+      border: `1px solid ${done ? task.bd : THEME.line}`,
+      boxShadow: done ? THEME.shadowSm : "none",
+      overflow: "hidden",
+      transition: "border-color 0.25s, box-shadow 0.25s",
     }}>
       <div
-        style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", cursor: "pointer", userSelect: "none" }}
+        style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", cursor: "pointer", userSelect: "none" }}
         onClick={() => setExpanded(e => !e)}
       >
-        <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0 }}>{task.icon}</span>
+        {/* Emoji icon square */}
+        <div style={{
+          width: 40, height: 40, borderRadius: THEME.rSm,
+          background: done ? task.bg : THEME.surfaceAlt,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 20, flexShrink: 0,
+          border: `1px solid ${done ? task.bd : THEME.line}`,
+          transition: "background 0.25s, border-color 0.25s",
+        }}>
+          {task.icon}
+        </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ color: done ? task.tx : "#94A3B8", fontWeight: 500, fontSize: 13, transition: "color 0.25s", fontFamily: FONTS.sans, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <div style={{
+            color: done ? task.tx : THEME.ink,
+            fontWeight: 700, fontSize: 13.5,
+            fontFamily: FONTS.nunito,
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+            transition: "color 0.25s",
+          }}>
             {task.label}
           </div>
           <div style={{ display: "flex", gap: 8, marginTop: 2, alignItems: "center" }}>
-            {streak > 0 && <span style={{ fontSize: 10, color: task.tx, opacity: 0.85, fontFamily: FONTS.mono }}>🔥{streak}d</span>}
-            <span style={{ fontSize: 10, color: "#2D3748", fontFamily: FONTS.mono }}>{rate}%</span>
+            {streak > 0 && (
+              <span style={{ fontSize: 10.5, color: task.tx, fontFamily: FONTS.mono }}>
+                🔥 {streak}d
+              </span>
+            )}
+            <span style={{ fontSize: 10.5, color: THEME.inkFaint, fontFamily: FONTS.mono }}>
+              {rate}%
+            </span>
           </div>
         </div>
 
-        <button
-          onClick={e => { e.stopPropagation(); toggle(selectedDate, task.id); }}
-          style={{
-            width: 30, height: 30, borderRadius: 8, flexShrink: 0,
-            border: `1.5px solid ${done ? task.bd : "#374151"}`,
-            background: done ? task.bd + "44" : "transparent",
-            color: done ? task.tx : "#374151", fontSize: 13, cursor: "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            transition: "all 0.2s", fontWeight: 700,
-          }}
-        >
-          {done ? "✓" : "○"}
-        </button>
+        <CheckBubble
+          checked={done}
+          onChange={() => toggle(selectedDate, task.id)}
+          color={task.tx}
+          size={30}
+        />
 
-        <span style={{ color: "#1E293B", fontSize: 10, flexShrink: 0, transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
+        <span style={{
+          color: THEME.inkFaint, fontSize: 10, flexShrink: 0,
+          transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+          transition: "transform 0.2s",
+        }}>
           ▼
         </span>
       </div>
 
       {expanded && (
-        <div style={{ padding: "2px 14px 14px", borderTop: `1px solid ${task.bd}22` }}>
+        <div style={{ padding: "2px 14px 14px", borderTop: `1px solid ${THEME.line}` }}>
           <div style={{ marginBottom: 12 }}>
             <SpecificForm data={taskData} update={update} date={selectedDate} />
           </div>

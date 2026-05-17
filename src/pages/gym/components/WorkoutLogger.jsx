@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { FONTS, MUSCLE_GROUPS } from "../../../lib/constants.js";
+import { FONTS, THEME, MUSCLE_GROUPS } from "../../../lib/constants.js";
 import { CalendarPicker } from "../../../components/ui/CalendarPicker.jsx";
 import { createGymWorkout, upsertExerciseInLibrary, updateExercisePR, upsertLog } from "../../../lib/db.js";
 import { ExerciseBlock } from "./ExerciseBlock.jsx";
 
-function todayKey() { return new Date().toISOString().split("T")[0]; }
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 function detectPR(exerciseName, weightKg, reps, library) {
   const lib = library.find(e => e.name.toLowerCase() === exerciseName.toLowerCase());
@@ -77,7 +80,6 @@ export function WorkoutLogger({ open, onClose, library, onSaved, userId }) {
 
       await createGymWorkout(userId, meta);
 
-      // Update exercise library + PRs
       for (const ex of exercises.filter(e => e.name.trim() && workoutType !== "cardio")) {
         await upsertExerciseInLibrary(userId, ex.name.trim(), ex.muscle_group).catch(() => {});
         const bestSet = ex.sets.reduce((best, s) => {
@@ -115,42 +117,42 @@ export function WorkoutLogger({ open, onClose, library, onSaved, userId }) {
   return createPortal(
     <div style={{
       position: "fixed", inset: 0, zIndex: 1000,
-      background: "rgba(0,0,0,0.85)", backdropFilter: "blur(4px)",
+      background: "rgba(43,30,24,0.5)", backdropFilter: "blur(6px)",
       display: "flex", flexDirection: "column",
     }}>
       {/* Top bar */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "14px 20px", background: "rgba(8,9,26,0.95)",
-        borderBottom: "1px solid rgba(59,130,246,0.12)", flexShrink: 0,
+        padding: "14px 20px", background: THEME.surface,
+        borderBottom: `1px solid ${THEME.line}`, flexShrink: 0,
+        boxShadow: THEME.shadowSm,
       }}>
-        <button onClick={handleClose} style={{ background: "rgba(30,41,59,0.8)", border: "1px solid #1E293B", borderRadius: 8, color: "#94A3B8", fontFamily: FONTS.sans, fontSize: 13, padding: "6px 12px", cursor: "pointer" }}>✕ Cancel</button>
-        <span style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 15, color: "#F1F5F9" }}>Log Workout</span>
+        <button onClick={handleClose} style={{ background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`, borderRadius: THEME.rSm, color: THEME.inkSoft, fontFamily: FONTS.sans, fontSize: 13, padding: "6px 12px", cursor: "pointer" }}>✕ Cancel</button>
+        <span style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 15, color: THEME.ink }}>Log Workout</span>
         <button
           onClick={handleFinish}
           disabled={saving}
-          style={{ background: "#3B82F6", border: "none", borderRadius: 8, color: "#fff", fontFamily: FONTS.syne, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: saving ? "wait" : "pointer", opacity: saving ? 0.7 : 1 }}
+          style={{ background: "#E8623A", border: "none", borderRadius: THEME.rSm, color: "#fff", fontFamily: FONTS.nunito, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: saving ? "wait" : "pointer", opacity: saving ? 0.7 : 1, boxShadow: THEME.shadowSm }}
         >
           {saving ? "Saving..." : "Finish 💪"}
         </button>
       </div>
 
       {/* Scrollable body */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px 20px 40px", maxWidth: 680, margin: "0 auto", width: "100%" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "20px 20px 40px", maxWidth: 680, margin: "0 auto", width: "100%", background: THEME.bg }}>
         {error && (
-          <div style={{ marginBottom: 14, padding: "10px 14px", background: "#2D0000", border: "1px solid #B91C1C", borderRadius: 8, color: "#FCA5A5", fontSize: 13, fontFamily: FONTS.sans }}>{error}</div>
+          <div style={{ marginBottom: 14, padding: "10px 14px", background: "#FFD6DF", border: "1px solid #F5BEC9", borderRadius: THEME.rSm, color: "#D6395B", fontSize: 13, fontFamily: FONTS.sans }}>{error}</div>
         )}
 
-        {/* Meta row */}
+        {/* Type pills */}
         <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
-          {/* Type pills */}
           <div style={{ display: "flex", gap: 6 }}>
             {[["weights", "💪 Weights"], ["cardio", "🏃 Cardio"], ["mixed", "⚡ Mixed"]].map(([val, label]) => (
               <button key={val} onClick={() => setWorkoutType(val)} style={{
-                padding: "7px 13px", borderRadius: 8, fontFamily: FONTS.sans, fontSize: 12, cursor: "pointer",
-                border: `1px solid ${workoutType === val ? "#3B82F6" : "#1E293B"}`,
-                background: workoutType === val ? "rgba(59,130,246,0.15)" : "transparent",
-                color: workoutType === val ? "#3B82F6" : "#475569",
+                padding: "7px 13px", borderRadius: THEME.rPill, fontFamily: FONTS.sans, fontSize: 12, cursor: "pointer",
+                border: `1px solid ${workoutType === val ? "#E8623A" : THEME.line}`,
+                background: workoutType === val ? "#FFDDD0" : THEME.surfaceAlt,
+                color: workoutType === val ? "#E8623A" : THEME.inkSoft,
               }}>{label}</button>
             ))}
           </div>
@@ -183,7 +185,7 @@ export function WorkoutLogger({ open, onClose, library, onSaved, userId }) {
         {/* Cardio-specific fields */}
         {workoutType === "cardio" && (
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 10, color: "#3B82F6", fontFamily: FONTS.mono, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Cardio Details</div>
+            <div style={{ fontSize: 10, color: "#E8623A", fontFamily: FONTS.mono, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Cardio Details</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <Field label="Type">
                 <select value={cardioData.cardio_type} onChange={e => setCardioData(d => ({ ...d, cardio_type: e.target.value }))} style={inputStyle()}>
@@ -200,7 +202,7 @@ export function WorkoutLogger({ open, onClose, library, onSaved, userId }) {
         {/* Exercises section */}
         {workoutType !== "cardio" && (
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 10, color: "#3B82F6", fontFamily: FONTS.mono, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>Exercises</div>
+            <div style={{ fontSize: 10, color: "#E8623A", fontFamily: FONTS.mono, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>Exercises</div>
             {exercises.map((ex, i) => (
               <ExerciseBlock
                 key={i}
@@ -217,23 +219,23 @@ export function WorkoutLogger({ open, onClose, library, onSaved, userId }) {
             <button
               onClick={addExercise}
               style={{
-                width: "100%", padding: "12px", background: "rgba(59,130,246,0.05)",
-                border: "1px dashed rgba(59,130,246,0.25)", borderRadius: 12,
-                color: "#3B82F6", fontFamily: FONTS.sans, fontSize: 14, cursor: "pointer",
+                width: "100%", padding: "12px", background: "#FFDDD0",
+                border: "1px dashed #F5C4B5", borderRadius: THEME.rMd,
+                color: "#E8623A", fontFamily: FONTS.sans, fontSize: 14, cursor: "pointer",
               }}
             >+ Add Exercise</button>
           </div>
         )}
 
         {/* Post-workout journal */}
-        <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: 20 }}>
-          <div style={{ fontSize: 10, color: "#6B7280", fontFamily: FONTS.mono, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Post-Workout Journal</div>
+        <div style={{ borderTop: `1px solid ${THEME.line}`, paddingTop: 20 }}>
+          <div style={{ fontSize: 10, color: THEME.inkMuted, fontFamily: FONTS.mono, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Post-Workout Journal</div>
           <textarea
             value={postNotes}
             onChange={e => setPostNotes(e.target.value)}
             placeholder="How did it feel? What went well? What to improve next time..."
             rows={4}
-            style={{ ...inputStyle(), resize: "vertical", color: "#CBD5E1" }}
+            style={{ ...inputStyle(), resize: "vertical" }}
           />
         </div>
       </div>
@@ -245,22 +247,23 @@ export function WorkoutLogger({ open, onClose, library, onSaved, userId }) {
 function Field({ label, children, style }) {
   return (
     <div style={style}>
-      <div style={{ fontSize: 10, color: "#475569", fontFamily: FONTS.mono, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 5 }}>{label}</div>
+      <div style={{ fontSize: 10, color: THEME.inkMuted, fontFamily: FONTS.mono, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 5 }}>{label}</div>
       {children}
     </div>
   );
 }
 
-function inputStyle() {
+function inputStyle(extra = {}) {
   return {
-    background: "#08091A",
-    border: "1px solid #1E293B",
-    borderRadius: 8,
+    background: THEME.surface,
+    border: `1.5px solid ${THEME.line}`,
+    borderRadius: THEME.rSm,
     padding: "8px 10px",
-    color: "#E2E8F0",
+    color: THEME.ink,
     fontSize: 13,
     fontFamily: FONTS.sans,
     outline: "none",
     width: "100%",
+    ...extra,
   };
 }

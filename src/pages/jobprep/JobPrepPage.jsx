@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { FONTS } from "../../lib/constants.js";
+import { FONTS, THEME } from "../../lib/constants.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import {
   getJobPrepDailyLog,
@@ -32,7 +32,7 @@ function fmtDate(dateStr) {
 
 function getWeekStart(offset) {
   const d = new Date();
-  const day = d.getDay(); // 0=Sun
+  const day = d.getDay();
   const mondayOffset = day === 0 ? -6 : 1 - day;
   d.setDate(d.getDate() + mondayOffset + offset * 7);
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -52,14 +52,14 @@ function getMonthBounds(offset) {
 }
 
 function durationColor(minutes) {
-  if (!minutes || minutes <= 0) return "#1A1A2E";
-  if (minutes < 30) return "#4A0000";
-  if (minutes < 60) return "#7F1D1D";
-  return "#B91C1C";
+  if (!minutes || minutes <= 0) return THEME.surfaceAlt;
+  if (minutes < 30) return "#FFD6DF";
+  if (minutes < 60) return "#FBD2E2";
+  return "#F5BEC9";
 }
 
-const ACCENT     = "#FCA5A5";
-const ACCENT_DIM = "rgba(252,165,165,0.12)";
+const ACCENT     = "#D6395B";
+const ACCENT_BG  = "#FFD6DF";
 const DAY_NAMES  = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 // ─── RoadmapPanel ─────────────────────────────────────────────────────────────
@@ -67,11 +67,12 @@ const DAY_NAMES  = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 function RoadmapPanel({ open, onToggle }) {
   return (
     <div style={{
-      border: "1px solid rgba(185,28,28,0.3)",
-      borderRadius: 12,
-      background: "rgba(45,0,0,0.4)",
+      border: `1px solid #F5BEC9`,
+      borderRadius: THEME.rMd,
+      background: THEME.surface,
       marginBottom: 20,
       overflow: "hidden",
+      boxShadow: THEME.shadowSm,
     }}>
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -79,13 +80,13 @@ function RoadmapPanel({ open, onToggle }) {
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 16 }}>📋</span>
-          <span style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 14, color: "#E2E8F0" }}>
+          <span style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 14, color: THEME.ink }}>
             GM Preparation Roadmap
           </span>
           <span style={{
-            fontFamily: FONTS.mono, fontSize: 9, color: "#B91C1C",
-            background: "rgba(185,28,28,0.15)", border: "1px solid rgba(185,28,28,0.3)",
-            borderRadius: 4, padding: "1px 6px", letterSpacing: 1, textTransform: "uppercase",
+            fontFamily: FONTS.mono, fontSize: 9, color: ACCENT,
+            background: ACCENT_BG, border: `1px solid #F5BEC9`,
+            borderRadius: THEME.rPill, padding: "1px 6px", letterSpacing: 1, textTransform: "uppercase",
           }}>
             2–3 Month Plan
           </span>
@@ -93,10 +94,10 @@ function RoadmapPanel({ open, onToggle }) {
         <button
           onClick={onToggle}
           style={{
-            background: open ? ACCENT_DIM : "transparent",
-            border: `1px solid ${open ? "rgba(252,165,165,0.3)" : "#1E293B"}`,
-            borderRadius: 8, padding: "5px 12px",
-            color: open ? ACCENT : "#4A5568",
+            background: open ? ACCENT_BG : THEME.surfaceAlt,
+            border: `1px solid ${open ? "#F5BEC9" : THEME.line}`,
+            borderRadius: THEME.rSm, padding: "5px 12px",
+            color: open ? ACCENT : THEME.inkSoft,
             fontFamily: FONTS.sans, fontSize: 12, cursor: "pointer",
           }}
         >
@@ -170,14 +171,14 @@ function DailyLogTab({ userId, selectedDate, setSelectedDate }) {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
         <button
           onClick={() => setSelectedDate(d => addDays(d, -1))}
-          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid #1E293B", color: "#94A3B8", borderRadius: 8, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12 }}
+          style={{ background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`, color: THEME.inkSoft, borderRadius: THEME.rSm, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12, cursor: "pointer" }}
         >←</button>
 
         <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-          <span style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 15, color: "#E2E8F0", userSelect: "none" }}>
+          <span style={{ fontFamily: FONTS.nunito, fontWeight: 700, fontSize: 15, color: THEME.ink, userSelect: "none" }}>
             {isToday ? "Today" : fmtDate(selectedDate)}
           </span>
-          <span style={{ fontSize: 13, color: "#4A5568" }}>📅</span>
+          <span style={{ fontSize: 13, color: THEME.inkFaint }}>📅</span>
           <input
             type="date"
             value={selectedDate}
@@ -190,17 +191,17 @@ function DailyLogTab({ userId, selectedDate, setSelectedDate }) {
         <button
           onClick={() => !isToday && setSelectedDate(d => addDays(d, 1))}
           style={{
-            background: isToday ? "transparent" : "rgba(255,255,255,0.05)",
-            border: "1px solid #1E293B",
-            color: isToday ? "#1E293B" : "#94A3B8",
-            borderRadius: 8, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12,
+            background: isToday ? "transparent" : THEME.surfaceAlt,
+            border: `1px solid ${THEME.line}`,
+            color: isToday ? THEME.line : THEME.inkSoft,
+            borderRadius: THEME.rSm, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12,
             cursor: isToday ? "default" : "pointer",
           }}
         >→</button>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: 40, color: "#334155", fontFamily: FONTS.sans }}>Loading…</div>
+        <div style={{ textAlign: "center", padding: 40, color: THEME.inkFaint, fontFamily: FONTS.sans }}>Loading…</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <Input
@@ -243,11 +244,11 @@ function DailyLogTab({ userId, selectedDate, setSelectedDate }) {
             onClick={handleSave}
             disabled={saving}
             style={{
-              padding: "11px", borderRadius: 10,
-              background: saved ? "rgba(74,222,128,0.12)" : saving ? "#1E293B" : ACCENT_DIM,
-              border: `1px solid ${saved ? "rgba(74,222,128,0.35)" : saving ? "#334155" : "rgba(252,165,165,0.3)"}`,
-              color: saved ? "#4ADE80" : saving ? "#475569" : ACCENT,
-              fontFamily: FONTS.syne, fontSize: 14, fontWeight: 700,
+              padding: "11px", borderRadius: THEME.rMd,
+              background: saved ? "#D2EEDB" : saving ? THEME.surfaceAlt : ACCENT_BG,
+              border: `1px solid ${saved ? "#BCDFC8" : saving ? THEME.line : "#F5BEC9"}`,
+              color: saved ? "#4FA070" : saving ? THEME.inkFaint : ACCENT,
+              fontFamily: FONTS.nunito, fontSize: 14, fontWeight: 700,
               cursor: saving ? "default" : "pointer",
               transition: "all 0.2s",
             }}
@@ -289,24 +290,24 @@ function WeekViewTab({ userId, weekOffset, setWeekOffset, onDayClick }) {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
         <button
           onClick={() => setWeekOffset(o => o - 1)}
-          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid #1E293B", color: "#94A3B8", borderRadius: 8, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12 }}
+          style={{ background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`, color: THEME.inkSoft, borderRadius: THEME.rSm, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12, cursor: "pointer" }}
         >←</button>
-        <span style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 14, color: "#E2E8F0" }}>
+        <span style={{ fontFamily: FONTS.nunito, fontWeight: 700, fontSize: 14, color: THEME.ink }}>
           Week of {fmtDate(weekStart)}
         </span>
         <button
           onClick={() => weekOffset < 0 && setWeekOffset(o => o + 1)}
           style={{
-            background: weekOffset >= 0 ? "transparent" : "rgba(255,255,255,0.05)",
-            border: "1px solid #1E293B", color: weekOffset >= 0 ? "#1E293B" : "#94A3B8",
-            borderRadius: 8, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12,
+            background: weekOffset >= 0 ? "transparent" : THEME.surfaceAlt,
+            border: `1px solid ${THEME.line}`, color: weekOffset >= 0 ? THEME.line : THEME.inkSoft,
+            borderRadius: THEME.rSm, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12,
             cursor: weekOffset >= 0 ? "default" : "pointer",
           }}
         >→</button>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: 40, color: "#334155", fontFamily: FONTS.sans }}>Loading…</div>
+        <div style={{ textAlign: "center", padding: 40, color: THEME.inkFaint, fontFamily: FONTS.sans }}>Loading…</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {days.map((dateStr, i) => {
@@ -323,50 +324,51 @@ function WeekViewTab({ userId, weekOffset, setWeekOffset, onDayClick }) {
                 onClick={() => onDayClick(dateStr)}
                 style={{
                   border: logged
-                    ? "1px solid rgba(185,28,28,0.5)"
-                    : isToday ? `1px solid rgba(252,165,165,0.3)` : "1px solid #1E293B",
-                  background: logged ? "rgba(45,0,0,0.5)" : "#0D1117",
-                  borderRadius: 10, padding: "12px 16px",
+                    ? `1px solid #F5BEC9`
+                    : isToday ? `1px solid ${THEME.lineStrong}` : `1px solid ${THEME.line}`,
+                  background: logged ? ACCENT_BG : isToday ? THEME.surfaceAlt : THEME.surface,
+                  borderRadius: THEME.rMd, padding: "12px 16px",
                   cursor: "pointer", display: "flex", alignItems: "center", gap: 14,
+                  boxShadow: THEME.shadowSm,
                 }}
               >
                 <div style={{ minWidth: 42, textAlign: "center", flexShrink: 0 }}>
-                  <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: "#4A5568", letterSpacing: 1 }}>
+                  <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: THEME.inkFaint, letterSpacing: 1 }}>
                     {DAY_NAMES[i]}
                   </div>
-                  <div style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 16, color: isToday ? ACCENT : "#94A3B8", marginTop: 2 }}>
+                  <div style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 16, color: isToday ? ACCENT : THEME.inkSoft, marginTop: 2 }}>
                     {dateStr.slice(8)}
                   </div>
                 </div>
 
-                <div style={{ width: 1, height: 36, background: "#1E293B", flexShrink: 0 }} />
+                <div style={{ width: 1, height: 36, background: THEME.line, flexShrink: 0 }} />
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   {logged ? (
                     <>
                       <div style={{ marginBottom: snippet ? 4 : 0 }}>
                         <span style={{
-                          background: "rgba(185,28,28,0.2)", border: "1px solid rgba(185,28,28,0.4)",
-                          borderRadius: 6, padding: "2px 8px",
+                          background: ACCENT_BG, border: `1px solid #F5BEC9`,
+                          borderRadius: THEME.rPill, padding: "2px 8px",
                           fontFamily: FONTS.mono, fontSize: 10, color: ACCENT,
                         }}>
                           {entry.duration_min} min
                         </span>
                       </div>
                       {snippet && (
-                        <div style={{ fontFamily: FONTS.sans, fontSize: 12, color: "#4A5568", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <div style={{ fontFamily: FONTS.sans, fontSize: 12, color: THEME.inkMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {snippet}
                         </div>
                       )}
                     </>
                   ) : (
-                    <div style={{ fontFamily: FONTS.sans, fontSize: 12, color: "#334155" }}>
+                    <div style={{ fontFamily: FONTS.sans, fontSize: 12, color: THEME.inkFaint }}>
                       {isToday ? "Log today's study →" : "Nothing logged"}
                     </div>
                   )}
                 </div>
 
-                <span style={{ color: "#334155", fontSize: 14, flexShrink: 0 }}>›</span>
+                <span style={{ color: THEME.inkFaint, fontSize: 14, flexShrink: 0 }}>›</span>
               </div>
             );
           })}
@@ -399,24 +401,24 @@ function MonthViewTab({ userId, monthOffset, setMonthOffset, onDayClick }) {
 
   const firstDay    = new Date(bounds.year, bounds.month, 1);
   const totalDays   = new Date(bounds.year, bounds.month + 1, 0).getDate();
-  const leadBlanks  = (firstDay.getDay() + 6) % 7; // Monday-based
+  const leadBlanks  = (firstDay.getDay() + 6) % 7;
 
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
         <button
           onClick={() => setMonthOffset(o => o - 1)}
-          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid #1E293B", color: "#94A3B8", borderRadius: 8, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12 }}
+          style={{ background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`, color: THEME.inkSoft, borderRadius: THEME.rSm, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12, cursor: "pointer" }}
         >←</button>
-        <span style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 14, color: "#E2E8F0" }}>
+        <span style={{ fontFamily: FONTS.nunito, fontWeight: 700, fontSize: 14, color: THEME.ink }}>
           {firstDay.toLocaleDateString("en-IN", { month: "long", year: "numeric" })}
         </span>
         <button
           onClick={() => monthOffset < 0 && setMonthOffset(o => o + 1)}
           style={{
-            background: monthOffset >= 0 ? "transparent" : "rgba(255,255,255,0.05)",
-            border: "1px solid #1E293B", color: monthOffset >= 0 ? "#1E293B" : "#94A3B8",
-            borderRadius: 8, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12,
+            background: monthOffset >= 0 ? "transparent" : THEME.surfaceAlt,
+            border: `1px solid ${THEME.line}`, color: monthOffset >= 0 ? THEME.line : THEME.inkSoft,
+            borderRadius: THEME.rSm, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12,
             cursor: monthOffset >= 0 ? "default" : "pointer",
           }}
         >→</button>
@@ -424,14 +426,14 @@ function MonthViewTab({ userId, monthOffset, setMonthOffset, onDayClick }) {
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, marginBottom: 4 }}>
         {DAY_NAMES.map(d => (
-          <div key={d} style={{ textAlign: "center", fontFamily: FONTS.mono, fontSize: 9, color: "#334155", letterSpacing: 1, padding: "4px 0" }}>
+          <div key={d} style={{ textAlign: "center", fontFamily: FONTS.mono, fontSize: 9, color: THEME.inkFaint, letterSpacing: 1, padding: "4px 0" }}>
             {d}
           </div>
         ))}
       </div>
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: 40, color: "#334155", fontFamily: FONTS.sans }}>Loading…</div>
+        <div style={{ textAlign: "center", padding: 40, color: THEME.inkFaint, fontFamily: FONTS.sans }}>Loading…</div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
           {Array.from({ length: leadBlanks }).map((_, i) => <div key={`b${i}`} />)}
@@ -447,19 +449,19 @@ function MonthViewTab({ userId, monthOffset, setMonthOffset, onDayClick }) {
                 key={dateStr}
                 onClick={() => onDayClick(dateStr)}
                 style={{
-                  height: 44, borderRadius: 6,
+                  height: 44, borderRadius: THEME.rSm,
                   background: durationColor(mins),
-                  border: isToday ? `2px solid ${ACCENT}` : "1px solid rgba(255,255,255,0.04)",
+                  border: isToday ? `2px solid ${ACCENT}` : `1px solid ${THEME.line}`,
                   display: "flex", flexDirection: "column",
                   alignItems: "center", justifyContent: "center",
                   cursor: "pointer", gap: 2,
                 }}
               >
-                <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: mins > 0 ? ACCENT : "#334155", fontWeight: mins > 0 ? 600 : 400 }}>
+                <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: mins > 0 ? ACCENT : THEME.inkFaint, fontWeight: mins > 0 ? 600 : 400 }}>
                   {day}
                 </span>
                 {mins > 0 && (
-                  <span style={{ fontFamily: FONTS.mono, fontSize: 8, color: "rgba(252,165,165,0.65)" }}>
+                  <span style={{ fontFamily: FONTS.mono, fontSize: 8, color: ACCENT }}>
                     {mins >= 60 ? `${Math.round(mins / 60 * 10) / 10}h` : `${mins}m`}
                   </span>
                 )}
@@ -517,17 +519,17 @@ export default function JobPrepPage() {
   return (
     <div style={{
       minHeight: "100%",
-      background: "radial-gradient(ellipse at top, #2D0000 0%, #08091A 55%)",
+      background: THEME.bg,
       fontFamily: FONTS.sans,
     }}>
       <div style={{ padding: "24px 20px 80px", maxWidth: 760, margin: "0 auto" }}>
 
         {/* Header */}
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontFamily: FONTS.syne, fontWeight: 800, fontSize: 26, color: "#F1F5F9", letterSpacing: -0.5 }}>
+          <div style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 26, color: THEME.ink, letterSpacing: -0.5 }}>
             🔥 GM Job Prep
           </div>
-          <div style={{ fontFamily: FONTS.mono, fontSize: 11, color: "#B91C1C", marginTop: 4, letterSpacing: 1 }}>
+          <div style={{ fontFamily: FONTS.mono, fontSize: 11, color: ACCENT, marginTop: 4, letterSpacing: 1 }}>
             General Motors · Automation Controls Engineer · Bangalore
           </div>
         </div>
@@ -540,12 +542,13 @@ export default function JobPrepPage() {
             { label: "Day Streak",   value: `${streak} 🔥` },
           ].map(c => (
             <div key={c.label} style={{
-              background: "rgba(252,165,165,0.05)", border: "1px solid rgba(252,165,165,0.15)",
-              borderRadius: 10, padding: "8px 14px",
+              background: ACCENT_BG, border: `1px solid #F5BEC9`,
+              borderRadius: THEME.rMd, padding: "8px 14px",
               display: "flex", flexDirection: "column", alignItems: "center", minWidth: 90,
+              boxShadow: THEME.shadowSm,
             }}>
-              <span style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 18, color: ACCENT }}>{c.value}</span>
-              <span style={{ fontFamily: FONTS.mono, fontSize: 9, color: "#475569", textTransform: "uppercase", letterSpacing: 1 }}>{c.label}</span>
+              <span style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 18, color: ACCENT }}>{c.value}</span>
+              <span style={{ fontFamily: FONTS.mono, fontSize: 9, color: THEME.inkMuted, textTransform: "uppercase", letterSpacing: 1 }}>{c.label}</span>
             </div>
           ))}
         </div>
@@ -554,7 +557,7 @@ export default function JobPrepPage() {
         <RoadmapPanel open={roadmapOpen} onToggle={() => setRoadmapOpen(o => !o)} />
 
         {/* Tabs */}
-        <div style={{ display: "flex", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: 24, overflowX: "auto" }}>
+        <div style={{ display: "flex", borderBottom: `1px solid ${THEME.line}`, marginBottom: 24, overflowX: "auto" }}>
           {TABS.map(tab => (
             <button
               key={tab.key}
@@ -562,7 +565,7 @@ export default function JobPrepPage() {
               style={{
                 padding: "10px 16px", background: "transparent", border: "none",
                 borderBottom: activeTab === tab.key ? `2px solid ${ACCENT}` : "2px solid transparent",
-                color: activeTab === tab.key ? ACCENT : "#4A5568",
+                color: activeTab === tab.key ? ACCENT : THEME.inkMuted,
                 fontFamily: FONTS.sans, fontSize: 13, fontWeight: 500,
                 marginBottom: -1, whiteSpace: "nowrap", cursor: "pointer",
               }}

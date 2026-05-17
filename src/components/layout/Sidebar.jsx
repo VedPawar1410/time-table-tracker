@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { signOut } from "../../lib/db.js";
-import { FONTS } from "../../lib/constants.js";
+import { FONTS, THEME } from "../../lib/constants.js";
 
 const PRIMARY_ITEMS = [
   { to: "/", label: "Home", icon: "🏠", exact: true },
@@ -9,19 +9,19 @@ const PRIMARY_ITEMS = [
 ];
 
 const DEFAULT_DEEP_DIVES = [
-  { to: "/gym", label: "Gym", icon: "💪" },
-  { to: "/jobprep", label: "Job Prep", icon: "🔥" },
-  { to: "/reading", label: "Reading", icon: "📘" },
-  { to: "/catprep", label: "CAT Prep", icon: "🎯" },
-  { to: "/video", label: "Video Editing", icon: "🎬" },
-  { to: "/sidehustle", label: "Side Hustle", icon: "💡" },
-  { to: "/hobbies", label: "Hobbies", icon: "🎨" },
-  { to: "/diet", label: "Diet", icon: "🥗" },
+  { to: "/gym",        label: "Gym",          icon: "💪" },
+  { to: "/jobprep",    label: "Job Prep",      icon: "🔥" },
+  { to: "/reading",    label: "Reading",       icon: "📘" },
+  { to: "/catprep",    label: "CAT Prep",      icon: "🎯" },
+  { to: "/video",      label: "Video Editing", icon: "🎬" },
+  { to: "/sidehustle", label: "Side Hustle",   icon: "💡" },
+  { to: "/hobbies",    label: "Hobbies",       icon: "🎨" },
+  { to: "/diet",       label: "Diet",          icon: "🥗" },
 ];
 
 const BOTTOM_SECTIONS = [
   { label: "Insights", items: [{ to: "/analytics", label: "Analytics", icon: "📈" }] },
-  { label: "Settings", items: [{ to: "/tasks", label: "Manage Tasks", icon: "⚙️" }] },
+  { label: "Settings", items: [{ to: "/tasks",     label: "Manage Tasks", icon: "⚙️" }] },
 ];
 
 const STORAGE_KEY = "sidebar_task_order";
@@ -30,7 +30,6 @@ function loadOrder() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
     if (!Array.isArray(saved)) return DEFAULT_DEEP_DIVES;
-    // Reconcile: preserve saved order but add any new items + remove deleted ones
     const savedTos = saved.map(i => i.to);
     const defaultMap = Object.fromEntries(DEFAULT_DEEP_DIVES.map(i => [i.to, i]));
     const ordered = saved.filter(i => defaultMap[i.to]).map(i => defaultMap[i.to]);
@@ -54,11 +53,12 @@ export function Sidebar() {
 
   const linkStyle = (isActive) => ({
     display: "flex", alignItems: "center", gap: 10,
-    padding: "9px 14px", borderRadius: 10, textDecoration: "none",
-    fontSize: 13.5, fontFamily: FONTS.sans, fontWeight: 400,
-    color: isActive ? "#E2E8F0" : "#4A5568",
-    background: isActive ? "#1E293B" : "transparent",
-    borderLeft: isActive ? "2px solid #4ADE80" : "2px solid transparent",
+    padding: "9px 14px", borderRadius: THEME.rSm,
+    textDecoration: "none",
+    fontSize: 13.5, fontFamily: FONTS.sans, fontWeight: isActive ? 600 : 400,
+    color: isActive ? THEME.primary : THEME.inkSoft,
+    background: isActive ? THEME.primarySoft : "transparent",
+    borderLeft: `2px solid ${isActive ? THEME.primary : "transparent"}`,
     transition: "all 0.15s",
     marginBottom: 2,
   });
@@ -86,22 +86,31 @@ export function Sidebar() {
   return (
     <div style={{
       position: "fixed", top: 0, left: 0, bottom: 0, width: 220,
-      background: "rgba(8,9,26,0.95)", backdropFilter: "blur(12px)",
-      borderRight: "1px solid #1E293B", display: "flex", flexDirection: "column",
+      background: THEME.surface,
+      borderRight: `1px solid ${THEME.line}`,
+      display: "flex", flexDirection: "column",
       padding: "20px 12px", zIndex: 100, overflowY: "auto",
+      boxShadow: "2px 0 12px rgba(122,46,14,0.06)",
     }}>
       {/* Brand */}
-      <div style={{ padding: "4px 14px 20px", borderBottom: "1px solid #1E293B", marginBottom: 12 }}>
-        <div style={{ fontFamily: FONTS.mono, fontSize: 8, letterSpacing: 3, color: "#4ADE80", textTransform: "uppercase", marginBottom: 4 }}>
+      <div style={{
+        padding: "4px 14px 20px",
+        borderBottom: `1px solid ${THEME.line}`,
+        marginBottom: 12,
+      }}>
+        <div style={{
+          fontFamily: FONTS.mono, fontSize: 8, letterSpacing: "0.22em",
+          color: THEME.primary, textTransform: "uppercase", marginBottom: 5,
+        }}>
           Personal OS
         </div>
-        <div style={{ fontFamily: FONTS.syne, fontSize: 16, fontWeight: 800, color: "#E2E8F0" }}>
+        <div style={{ fontFamily: FONTS.nunito, fontSize: 17, fontWeight: 900, color: THEME.ink }}>
           ⏰ Life Board
         </div>
       </div>
 
       <div style={{ flex: 1 }}>
-        {/* Primary section — fixed */}
+        {/* Primary nav */}
         <div style={{ marginBottom: 12 }}>
           {PRIMARY_ITEMS.map(item => (
             <NavLink key={item.to} to={item.to} end={item.exact} style={({ isActive }) => linkStyle(isActive)}>
@@ -113,7 +122,11 @@ export function Sidebar() {
 
         {/* Deep Dives — draggable */}
         <div style={{ marginBottom: 12 }}>
-          <div style={{ fontFamily: FONTS.mono, fontSize: 9, letterSpacing: 2, color: "#2D3748", textTransform: "uppercase", padding: "4px 14px 6px", marginBottom: 2 }}>
+          <div style={{
+            fontFamily: FONTS.mono, fontSize: 8.5, letterSpacing: "0.16em",
+            color: THEME.inkFaint, textTransform: "uppercase",
+            padding: "4px 14px 6px", marginBottom: 2,
+          }}>
             Deep Dives
           </div>
           {deepDives.map((item, idx) => (
@@ -134,17 +147,21 @@ export function Sidebar() {
               {hoveredTo === item.to && (
                 <span style={{
                   position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
-                  color: "#2D3748", fontSize: 13, pointerEvents: "none", lineHeight: 1,
+                  color: THEME.inkFaint, fontSize: 13, pointerEvents: "none", lineHeight: 1,
                 }}>⠿</span>
               )}
             </div>
           ))}
         </div>
 
-        {/* Bottom fixed sections */}
+        {/* Bottom sections */}
         {BOTTOM_SECTIONS.map((section, si) => (
           <div key={si} style={{ marginBottom: 12 }}>
-            <div style={{ fontFamily: FONTS.mono, fontSize: 9, letterSpacing: 2, color: "#2D3748", textTransform: "uppercase", padding: "4px 14px 6px", marginBottom: 2 }}>
+            <div style={{
+              fontFamily: FONTS.mono, fontSize: 8.5, letterSpacing: "0.16em",
+              color: THEME.inkFaint, textTransform: "uppercase",
+              padding: "4px 14px 6px", marginBottom: 2,
+            }}>
               {section.label}
             </div>
             {section.items.map(item => (
@@ -161,8 +178,9 @@ export function Sidebar() {
       <button
         onClick={handleSignOut}
         style={{
-          display: "flex", alignItems: "center", gap: 10, padding: "9px 14px", borderRadius: 10,
-          background: "transparent", border: "1px solid #1E293B", color: "#4A5568",
+          display: "flex", alignItems: "center", gap: 10, padding: "9px 14px",
+          borderRadius: THEME.rSm, background: "transparent",
+          border: `1px solid ${THEME.line}`, color: THEME.inkMuted,
           fontSize: 12, fontFamily: FONTS.sans, cursor: "pointer", width: "100%",
         }}
       >

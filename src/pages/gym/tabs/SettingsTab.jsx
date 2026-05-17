@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FONTS } from "../../../lib/constants.js";
+import { FONTS, THEME } from "../../../lib/constants.js";
 
 function getSettings() {
   try { return JSON.parse(localStorage.getItem("gym_settings") || "{}"); } catch { return {}; }
@@ -63,8 +63,8 @@ export function SettingsTab() {
         </Row>
       </Section>
 
-      <div style={{ marginTop: 16, padding: "12px 14px", background: "rgba(15,23,42,0.4)", border: "1px solid rgba(255,255,255,0.04)", borderRadius: 10 }}>
-        <div style={{ fontSize: 11, color: "#334155", fontFamily: FONTS.sans }}>
+      <div style={{ marginTop: 16, padding: "12px 14px", background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`, borderRadius: THEME.rSm }}>
+        <div style={{ fontSize: 11, color: THEME.inkMuted, fontFamily: FONTS.sans }}>
           Settings are saved locally on this device. They apply immediately to the workout logger.
         </div>
       </div>
@@ -75,8 +75,8 @@ export function SettingsTab() {
 function Section({ title, children }) {
   return (
     <div style={{ marginBottom: 20 }}>
-      <div style={{ fontSize: 10, color: "#475569", fontFamily: FONTS.mono, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8, paddingLeft: 2 }}>{title}</div>
-      <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.04)" }}>
+      <div style={{ fontSize: 10, color: THEME.inkMuted, fontFamily: FONTS.mono, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8, paddingLeft: 2 }}>{title}</div>
+      <div style={{ borderRadius: THEME.rSm, overflow: "hidden", border: `1px solid ${THEME.line}` }}>
         {children}
       </div>
     </div>
@@ -85,10 +85,10 @@ function Section({ title, children }) {
 
 function Row({ label, hint, children }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 14px", background: "rgba(15,23,42,0.5)", borderBottom: "1px solid rgba(255,255,255,0.03)", gap: 12, flexWrap: "wrap" }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 14px", background: THEME.surface, borderBottom: `1px solid ${THEME.line}`, gap: 12, flexWrap: "wrap" }}>
       <div>
-        <div style={{ fontFamily: FONTS.sans, fontSize: 14, color: "#E2E8F0", fontWeight: 500 }}>{label}</div>
-        {hint && <div style={{ fontSize: 11, color: "#334155", fontFamily: FONTS.sans, marginTop: 1 }}>{hint}</div>}
+        <div style={{ fontFamily: FONTS.sans, fontSize: 14, color: THEME.ink, fontWeight: 500 }}>{label}</div>
+        {hint && <div style={{ fontSize: 11, color: THEME.inkMuted, fontFamily: FONTS.sans, marginTop: 1 }}>{hint}</div>}
       </div>
       {children}
     </div>
@@ -103,10 +103,10 @@ function Pills({ options, value, onChange }) {
           key={val}
           onClick={() => onChange(val)}
           style={{
-            padding: "5px 12px", borderRadius: 7, fontFamily: FONTS.sans, fontSize: 12, cursor: "pointer",
-            border: `1px solid ${value === val ? "#3B82F6" : "#1E293B"}`,
-            background: value === val ? "rgba(59,130,246,0.15)" : "transparent",
-            color: value === val ? "#3B82F6" : "#475569",
+            padding: "5px 12px", borderRadius: THEME.rPill, fontFamily: FONTS.sans, fontSize: 12, cursor: "pointer",
+            border: `1px solid ${value === val ? "#E8623A" : THEME.line}`,
+            background: value === val ? "#FFDDD0" : THEME.surfaceAlt,
+            color: value === val ? "#E8623A" : THEME.inkSoft,
           }}
         >
           {label}

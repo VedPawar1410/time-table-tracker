@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { FONTS } from "../../lib/constants.js";
+import { FONTS, THEME } from "../../lib/constants.js";
 
 function toDateKey(date) {
   const y = date.getFullYear();
@@ -17,11 +17,9 @@ function getDaysInMonth(year, month) {
   return days;
 }
 
-// Build array of all days from Jan 1 of the given year up to today
 function getDaysForYear(year) {
-  const today = toDateKey(new Date());
+  const end = new Date();
   const start = new Date(year, 0, 1);
-  const end = new Date(); // today
   const days = [];
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     days.push(toDateKey(new Date(d)));
@@ -30,11 +28,11 @@ function getDaysForYear(year) {
 }
 
 function heatColor(pct) {
-  if (pct === 0) return "#0D1117";
-  if (pct < 0.25) return "#14532d";
-  if (pct < 0.5)  return "#166534";
-  if (pct < 0.75) return "#15803d";
-  return "#4ADE80";
+  if (pct === 0)    return THEME.bgAlt;
+  if (pct < 0.25)   return "#F0DAAB";
+  if (pct < 0.5)    return "#F0CFA8";
+  if (pct < 0.75)   return THEME.primary + "99";
+  return THEME.primary;
 }
 
 export function CalendarStrip({ selectedDate, setSelectedDate, onMonthChange, getStatsForDate, onYearView }) {
@@ -86,18 +84,41 @@ export function CalendarStrip({ selectedDate, setSelectedDate, onMonthChange, ge
 
   const modeLabel = { strip: "MONTH VIEW", month: "YEAR VIEW", year: "STRIP VIEW" }[mode];
 
+  const navBtn = (onClick, label, disabled) => (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        background: "transparent", border: "none",
+        color: disabled ? THEME.inkFaint : THEME.inkSoft,
+        fontSize: 18, cursor: disabled ? "default" : "pointer", padding: "4px 8px",
+        lineHeight: 1,
+      }}
+    >
+      {label}
+    </button>
+  );
+
   return (
     <div style={{ marginBottom: 18 }}>
       {mode !== "year" && (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button onClick={prevMonth} style={{ background: "transparent", border: "none", color: "#4A5568", fontSize: 16, cursor: "pointer", padding: "4px 8px" }}>‹</button>
-            <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: "#94A3B8", letterSpacing: 1 }}>{monthLabel}</span>
-            <button onClick={nextMonth} style={{ background: "transparent", border: "none", color: isCurrentMonth ? "#2D3748" : "#4A5568", fontSize: 16, cursor: "pointer", padding: "4px 8px" }}>›</button>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            {navBtn(prevMonth, "‹")}
+            <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: THEME.inkSoft, letterSpacing: "0.06em" }}>
+              {monthLabel}
+            </span>
+            {navBtn(nextMonth, "›", isCurrentMonth)}
           </div>
           <button
             onClick={cycleMode}
-            style={{ background: "transparent", border: "1px solid #1E293B", borderRadius: 6, color: "#4A5568", fontSize: 10, fontFamily: FONTS.mono, padding: "4px 10px", cursor: "pointer", letterSpacing: 0.5 }}
+            style={{
+              background: "transparent",
+              border: `1px solid ${THEME.line}`,
+              borderRadius: THEME.rSm,
+              color: THEME.inkMuted, fontSize: 9.5, fontFamily: FONTS.mono,
+              padding: "4px 10px", cursor: "pointer", letterSpacing: "0.08em",
+            }}
           >
             {modeLabel}
           </button>
@@ -106,10 +127,16 @@ export function CalendarStrip({ selectedDate, setSelectedDate, onMonthChange, ge
 
       {mode === "year" && (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-          <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: "#94A3B8", letterSpacing: 1 }}>{viewYear} — Activity Heatmap</span>
+          <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: THEME.inkSoft, letterSpacing: "0.06em" }}>
+            {viewYear} — Activity Heatmap
+          </span>
           <button
             onClick={cycleMode}
-            style={{ background: "transparent", border: "1px solid #1E293B", borderRadius: 6, color: "#4A5568", fontSize: 10, fontFamily: FONTS.mono, padding: "4px 10px", cursor: "pointer", letterSpacing: 0.5 }}
+            style={{
+              background: "transparent", border: `1px solid ${THEME.line}`,
+              borderRadius: THEME.rSm, color: THEME.inkMuted, fontSize: 9.5,
+              fontFamily: FONTS.mono, padding: "4px 10px", cursor: "pointer",
+            }}
           >
             STRIP VIEW
           </button>
@@ -128,22 +155,31 @@ export function CalendarStrip({ selectedDate, setSelectedDate, onMonthChange, ge
                 key={day}
                 onClick={() => !isFuture && setSelectedDate(day)}
                 style={{
-                  flex: "0 0 48px", height: 60, borderRadius: 10,
-                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
+                  flex: "0 0 48px", height: 64, borderRadius: THEME.rSm,
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
                   cursor: isFuture ? "default" : "pointer",
-                  background: isSelected ? "#022c22" : "#0D1117",
-                  border: `1px solid ${isSelected ? "#115E59" : "#1E293B"}`,
-                  opacity: isFuture ? 0.3 : 1,
-                  transition: "all 0.2s",
+                  background: isSelected ? THEME.primarySoft : THEME.surface,
+                  border: `1.5px solid ${isSelected ? THEME.primary : THEME.line}`,
+                  opacity: isFuture ? 0.35 : 1,
+                  transition: "all 0.18s",
+                  boxShadow: isSelected ? THEME.shadowSm : "none",
                 }}
               >
-                <div style={{ fontSize: 9.5, color: isSelected ? "#5EEAD4" : "#4A5568", fontFamily: FONTS.mono }}>
+                <div style={{
+                  fontSize: 9.5, fontFamily: FONTS.mono, letterSpacing: "0.05em",
+                  color: isSelected ? THEME.primary : THEME.inkFaint,
+                }}>
                   {d.toLocaleDateString("en-US", { weekday: "short" })}
                 </div>
-                <div style={{ fontFamily: FONTS.syne, fontSize: 17, fontWeight: 700, color: isSelected ? "#4ADE80" : "#E2E8F0" }}>
+                <div style={{
+                  fontFamily: FONTS.nunito, fontSize: 18, fontWeight: 800,
+                  color: isSelected ? THEME.primary : THEME.ink,
+                }}>
                   {d.getDate()}
                 </div>
-                {isToday && <div style={{ width: 4, height: 4, borderRadius: 2, background: "#FCD34D" }} />}
+                {isToday && (
+                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: THEME.primary }} />
+                )}
               </div>
             );
           })}
@@ -151,11 +187,20 @@ export function CalendarStrip({ selectedDate, setSelectedDate, onMonthChange, ge
       )}
 
       {mode === "month" && (
-        <MonthGrid year={viewYear} month={viewMonth} selectedDate={selectedDate} setSelectedDate={setSelectedDate} today={today} />
+        <MonthGrid
+          year={viewYear} month={viewMonth}
+          selectedDate={selectedDate} setSelectedDate={setSelectedDate}
+          today={today}
+        />
       )}
 
       {mode === "year" && (
-        <YearHeatmap year={viewYear} today={today} selectedDate={selectedDate} setSelectedDate={date => { setSelectedDate(date); setMode("strip"); }} getStatsForDate={getStatsForDate} />
+        <YearHeatmap
+          year={viewYear} today={today}
+          selectedDate={selectedDate}
+          setSelectedDate={date => { setSelectedDate(date); setMode("strip"); }}
+          getStatsForDate={getStatsForDate}
+        />
       )}
     </div>
   );
@@ -169,7 +214,12 @@ function MonthGrid({ year, month, selectedDate, setSelectedDate, today }) {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
       {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(d => (
-        <div key={d} style={{ textAlign: "center", fontFamily: FONTS.mono, fontSize: 9, color: "#2D3748", padding: "4px 0" }}>{d}</div>
+        <div key={d} style={{
+          textAlign: "center", fontFamily: FONTS.mono, fontSize: 9,
+          color: THEME.inkFaint, padding: "4px 0",
+        }}>
+          {d}
+        </div>
       ))}
       {blanks.map((_, i) => <div key={`b${i}`} />)}
       {days.map(day => {
@@ -183,12 +233,13 @@ function MonthGrid({ year, month, selectedDate, setSelectedDate, today }) {
             onClick={() => !isFuture && setSelectedDate(day)}
             style={{
               height: 38, display: "flex", alignItems: "center", justifyContent: "center",
-              borderRadius: 8, cursor: isFuture ? "default" : "pointer",
-              background: isSelected ? "#022c22" : "transparent",
-              border: `1px solid ${isSelected ? "#115E59" : isToday ? "#FCD34D44" : "transparent"}`,
+              borderRadius: THEME.rSm, cursor: isFuture ? "default" : "pointer",
+              background: isSelected ? THEME.primarySoft : "transparent",
+              border: `1.5px solid ${isSelected ? THEME.primary : isToday ? THEME.primary + "55" : "transparent"}`,
               opacity: isFuture ? 0.3 : 1,
-              fontFamily: FONTS.syne, fontWeight: 600, fontSize: 13,
-              color: isSelected ? "#4ADE80" : isToday ? "#FCD34D" : "#94A3B8",
+              fontFamily: FONTS.nunito, fontWeight: 700, fontSize: 13.5,
+              color: isSelected ? THEME.primary : isToday ? THEME.primary : THEME.ink,
+              transition: "all 0.15s",
             }}
           >
             {d.getDate()}
@@ -203,18 +254,14 @@ const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep
 
 function YearHeatmap({ year, today, selectedDate, setSelectedDate, getStatsForDate }) {
   const yearDays = getDaysForYear(year);
-
-  // Build a grid: pad the start so Jan 1 falls on its correct weekday (Sun=0)
   const jan1 = new Date(year, 0, 1);
-  const startPad = jan1.getDay(); // 0=Sun ... 6=Sat
+  const startPad = jan1.getDay();
   const cells = [...Array(startPad).fill(null), ...yearDays];
-  // Pad to full rows
   while (cells.length % 7 !== 0) cells.push(null);
 
   const weeks = [];
   for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 
-  // Month label positions: which column index does each month start at?
   const monthCols = {};
   yearDays.forEach((day, i) => {
     const col = Math.floor((i + startPad) / 7);
@@ -222,17 +269,16 @@ function YearHeatmap({ year, today, selectedDate, setSelectedDate, getStatsForDa
     if (monthCols[m] === undefined) monthCols[m] = col;
   });
 
-  const CELL = 11; // px per cell
+  const CELL = 11;
   const GAP = 2;
 
   return (
     <div style={{ overflowX: "auto", paddingBottom: 4 }}>
-      {/* Month labels row */}
-      <div style={{ display: "flex", marginBottom: 4, marginLeft: 20, paddingLeft: 0 }}>
+      <div style={{ display: "flex", marginBottom: 4, marginLeft: 20 }}>
         {weeks.map((_, wi) => {
           const monthIdx = Object.entries(monthCols).find(([, col]) => col === wi);
           return (
-            <div key={wi} style={{ width: CELL + GAP, flexShrink: 0, fontFamily: FONTS.mono, fontSize: 8, color: "#4A5568" }}>
+            <div key={wi} style={{ width: CELL + GAP, flexShrink: 0, fontFamily: FONTS.mono, fontSize: 8, color: THEME.inkFaint }}>
               {monthIdx ? MONTH_ABBR[Number(monthIdx[0])] : ""}
             </div>
           );
@@ -240,14 +286,14 @@ function YearHeatmap({ year, today, selectedDate, setSelectedDate, getStatsForDa
       </div>
 
       <div style={{ display: "flex", gap: 0 }}>
-        {/* Day-of-week labels */}
         <div style={{ display: "flex", flexDirection: "column", gap: GAP, marginRight: 4, flexShrink: 0 }}>
           {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(d => (
-            <div key={d} style={{ width: 14, height: CELL, fontFamily: FONTS.mono, fontSize: 7, color: "#2D3748", display: "flex", alignItems: "center" }}>{d}</div>
+            <div key={d} style={{ width: 14, height: CELL, fontFamily: FONTS.mono, fontSize: 7, color: THEME.inkFaint, display: "flex", alignItems: "center" }}>
+              {d}
+            </div>
           ))}
         </div>
 
-        {/* Week columns */}
         <div style={{ display: "flex", gap: GAP }}>
           {weeks.map((week, wi) => (
             <div key={wi} style={{ display: "flex", flexDirection: "column", gap: GAP }}>
@@ -264,8 +310,8 @@ function YearHeatmap({ year, today, selectedDate, setSelectedDate, getStatsForDa
                     title={`${day}: ${stats.done}/${stats.total} tasks`}
                     style={{
                       width: CELL, height: CELL, borderRadius: 2, cursor: "pointer",
-                      background: isSelected ? "#4ADE80" : heatColor(pct),
-                      outline: isToday ? "1px solid #FCD34D" : isSelected ? "1px solid #4ADE80" : "none",
+                      background: isSelected ? THEME.primary : heatColor(pct),
+                      outline: isToday ? `1.5px solid ${THEME.primary}` : isSelected ? `1.5px solid ${THEME.primary}` : "none",
                       outlineOffset: 1,
                       transition: "background 0.1s",
                     }}
@@ -277,13 +323,12 @@ function YearHeatmap({ year, today, selectedDate, setSelectedDate, getStatsForDa
         </div>
       </div>
 
-      {/* Legend */}
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, marginLeft: 20 }}>
-        <span style={{ fontFamily: FONTS.mono, fontSize: 8, color: "#2D3748" }}>Less</span>
+        <span style={{ fontFamily: FONTS.mono, fontSize: 8, color: THEME.inkFaint }}>Less</span>
         {[0, 0.2, 0.45, 0.65, 1].map(p => (
           <div key={p} style={{ width: CELL, height: CELL, borderRadius: 2, background: heatColor(p) }} />
         ))}
-        <span style={{ fontFamily: FONTS.mono, fontSize: 8, color: "#2D3748" }}>More</span>
+        <span style={{ fontFamily: FONTS.mono, fontSize: 8, color: THEME.inkFaint }}>More</span>
       </div>
     </div>
   );

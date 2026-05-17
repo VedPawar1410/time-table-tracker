@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useMediaQuery } from "../../hooks/useMediaQuery.js";
-import { FONTS } from "../../lib/constants.js";
+import { FONTS, THEME } from "../../lib/constants.js";
 
 export function Modal({ open, onClose, title, children, maxWidth = 560 }) {
   const isMobile = useMediaQuery("(max-width: 767px)");
@@ -24,7 +24,8 @@ export function Modal({ open, onClose, title, children, maxWidth = 560 }) {
       onClick={onClose}
       style={{
         position: "fixed", inset: 0, zIndex: 1000,
-        background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)",
+        background: "rgba(43,30,24,0.35)",
+        backdropFilter: "blur(6px)",
         display: "flex",
         alignItems: isMobile ? "flex-end" : "center",
         justifyContent: "center",
@@ -36,23 +37,48 @@ export function Modal({ open, onClose, title, children, maxWidth = 560 }) {
           width: "100%",
           maxWidth: isMobile ? "100%" : maxWidth,
           maxHeight: isMobile ? "92vh" : "90vh",
-          background: "#0D1117",
-          border: "1px solid #1E293B",
-          borderRadius: isMobile ? "20px 20px 0 0" : 20,
+          background: THEME.surface,
+          border: `1px solid ${THEME.line}`,
+          borderRadius: isMobile ? `${THEME.rLg} ${THEME.rLg} 0 0` : THEME.rLg,
+          boxShadow: THEME.shadowMd,
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
+          position: "relative",
         }}
       >
+        {/* drag handle on mobile */}
+        {isMobile && (
+          <div style={{
+            width: 36, height: 4, borderRadius: 2, background: THEME.line,
+            position: "absolute", left: "50%", transform: "translateX(-50%)", top: 10,
+          }} />
+        )}
+
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid #1E293B", flexShrink: 0 }}>
-          {isMobile && (
-            <div style={{ width: 36, height: 4, borderRadius: 2, background: "#1E293B", position: "absolute", left: "50%", transform: "translateX(-50%)", top: 8 }} />
-          )}
-          <span style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 16, color: "#E2E8F0" }}>{title}</span>
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: isMobile ? "24px 20px 16px" : "18px 20px",
+          borderBottom: `1px solid ${THEME.line}`,
+          flexShrink: 0,
+        }}>
+          <span style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 17, color: THEME.ink }}>
+            {title}
+          </span>
           <button
             onClick={onClose}
-            style={{ background: "transparent", border: "none", color: "#4A5568", fontSize: 20, cursor: "pointer", lineHeight: 1, padding: "0 4px" }}
+            style={{
+              background: THEME.surfaceAlt,
+              border: `1px solid ${THEME.line}`,
+              borderRadius: "50%",
+              width: 28, height: 28,
+              color: THEME.inkSoft,
+              fontSize: 16,
+              cursor: "pointer",
+              lineHeight: 1,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              padding: 0,
+            }}
           >
             ×
           </button>

@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
-import { FONTS } from "../../../lib/constants.js";
-import { getGymCalendarData, getGymSessionById } from "../../../lib/db.js";
+import { FONTS, THEME } from "../../../lib/constants.js";
+import { getGymCalendarData } from "../../../lib/db.js";
 
 const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DAY_LABELS = ["M","T","W","T","F","S","S"];
 
 const TYPE_COLOR = {
-  weights: { dot: "#3B82F6", label: "Weights" },
-  cardio:  { dot: "#22C55E", label: "Cardio" },
-  mixed:   { dot: "#A78BFA", label: "Mixed" },
-  rest:    { dot: "#4A5568", label: "Rest Day" },
+  weights: { dot: "#E8623A", label: "Weights" },
+  cardio:  { dot: "#6BAD3A", label: "Cardio" },
+  mixed:   { dot: "#8C6BD9", label: "Mixed" },
+  rest:    { dot: "#9C8170", label: "Rest Day" },
 };
 
 export function CalendarTab({ userId, sessions }) {
@@ -27,9 +27,7 @@ export function CalendarTab({ userId, sessions }) {
     try {
       const data = await getGymCalendarData(userId, year, month);
       setCalData(data);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }, [userId, year, month]);
 
   useEffect(() => { load(); }, [load]);
@@ -46,7 +44,6 @@ export function CalendarTab({ userId, sessions }) {
   };
 
   const daysInMonth = new Date(year, month, 0).getDate();
-  // ISO week: Monday = 0
   const firstDayOfWeek = (new Date(year, month - 1, 1).getDay() + 6) % 7;
   const cells = [];
   for (let i = 0; i < firstDayOfWeek; i++) cells.push(null);
@@ -58,23 +55,22 @@ export function CalendarTab({ userId, sessions }) {
     const entry = calData[dateKey];
     if (!entry) { setSelectedDay(null); setSelectedSession(null); return; }
     setSelectedDay(dateKey);
-    // Find session from already-loaded sessions list (no extra fetch needed for recent data)
     const found = sessions.find(s => s.log_date === dateKey);
-    if (found) { setSelectedSession(found); }
+    if (found) setSelectedSession(found);
   };
 
   const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   return (
     <div>
-      {/* Year + month nav */}
+      {/* Nav */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <NavBtn onClick={() => setYear(y => y - 1)}>«</NavBtn>
-          <span style={{ fontFamily: FONTS.mono, fontSize: 13, color: "#94A3B8", minWidth: 36, textAlign: "center" }}>{year}</span>
+          <span style={{ fontFamily: FONTS.mono, fontSize: 13, color: THEME.inkSoft, minWidth: 36, textAlign: "center" }}>{year}</span>
           <NavBtn onClick={() => setYear(y => y + 1)}>»</NavBtn>
         </div>
-        <div style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 17, color: "#F1F5F9" }}>
+        <div style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 17, color: THEME.ink }}>
           {MONTH_NAMES[month - 1]}
         </div>
         <div style={{ display: "flex", gap: 6 }}>
@@ -88,21 +84,21 @@ export function CalendarTab({ userId, sessions }) {
         {Object.entries(TYPE_COLOR).map(([type, { dot, label }]) => (
           <div key={type} style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: dot }} />
-            <span style={{ fontSize: 11, color: "#475569", fontFamily: FONTS.sans }}>{label}</span>
+            <span style={{ fontSize: 11, color: THEME.inkMuted, fontFamily: FONTS.sans }}>{label}</span>
           </div>
         ))}
       </div>
 
-      {/* Day-of-week headers */}
+      {/* Day headers */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, marginBottom: 6 }}>
         {DAY_LABELS.map((d, i) => (
-          <div key={i} style={{ textAlign: "center", fontSize: 10, color: "#334155", fontFamily: FONTS.mono, textTransform: "uppercase" }}>{d}</div>
+          <div key={i} style={{ textAlign: "center", fontSize: 9.5, color: THEME.inkFaint, fontFamily: FONTS.mono, textTransform: "uppercase" }}>{d}</div>
         ))}
       </div>
 
-      {/* Calendar grid */}
+      {/* Grid */}
       {loading ? (
-        <div style={{ textAlign: "center", padding: 30, color: "#334155", fontFamily: FONTS.mono, fontSize: 11 }}>Loading...</div>
+        <div style={{ textAlign: "center", padding: 30, color: THEME.inkFaint, fontFamily: FONTS.mono, fontSize: 11 }}>Loading...</div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
           {cells.map((day, i) => {
@@ -111,7 +107,7 @@ export function CalendarTab({ userId, sessions }) {
             const entry = calData[dateKey];
             const isToday = dateKey === todayKey;
             const isSelected = dateKey === selectedDay;
-            const dotColor = entry ? (TYPE_COLOR[entry.type]?.dot || "#3B82F6") : null;
+            const dotColor = entry ? (TYPE_COLOR[entry.type]?.dot || THEME.primary) : null;
 
             return (
               <div
@@ -119,21 +115,19 @@ export function CalendarTab({ userId, sessions }) {
                 onClick={() => handleDayClick(day)}
                 style={{
                   aspectRatio: "1",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: 8,
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                  borderRadius: THEME.rSm, gap: 3,
                   cursor: entry ? "pointer" : "default",
-                  background: isSelected ? "rgba(59,130,246,0.2)" : isToday ? "rgba(255,255,255,0.06)" : "transparent",
-                  border: isToday ? "1px solid rgba(255,255,255,0.15)" : isSelected ? "1px solid #3B82F6" : "1px solid transparent",
-                  gap: 3,
+                  background: isSelected ? THEME.primarySoft : isToday ? THEME.surfaceAlt : "transparent",
+                  border: `1.5px solid ${isSelected ? THEME.primary : isToday ? THEME.line : "transparent"}`,
                   transition: "background 0.15s",
                 }}
-                onMouseEnter={e => { if (entry) e.currentTarget.style.background = "rgba(59,130,246,0.1)"; }}
-                onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = isToday ? "rgba(255,255,255,0.06)" : "transparent"; }}
+                onMouseEnter={e => { if (entry) e.currentTarget.style.background = THEME.bgAlt; }}
+                onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = isToday ? THEME.surfaceAlt : "transparent"; }}
               >
-                <span style={{ fontSize: 13, fontFamily: FONTS.mono, color: isToday ? "#F1F5F9" : entry ? "#CBD5E1" : "#334155" }}>{day}</span>
+                <span style={{ fontSize: 13, fontFamily: FONTS.mono, color: isToday ? THEME.ink : entry ? THEME.inkSoft : THEME.inkFaint }}>
+                  {day}
+                </span>
                 {entry?.type === "rest"
                   ? <span style={{ fontSize: 9, lineHeight: 1 }}>🌙</span>
                   : dotColor && <div style={{ width: 5, height: 5, borderRadius: "50%", background: dotColor }} />}
@@ -143,24 +137,28 @@ export function CalendarTab({ userId, sessions }) {
         </div>
       )}
 
-      {/* Selected day popup */}
+      {/* Selected day detail */}
       {selectedDay && selectedSession && (
-        <div style={{ marginTop: 20, padding: "14px 16px", background: "rgba(15,23,42,0.9)", border: "1px solid rgba(59,130,246,0.2)", borderRadius: 14 }}>
-          <div style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 14, color: "#F1F5F9", marginBottom: 8 }}>
+        <div style={{
+          marginTop: 20, padding: "14px 16px",
+          background: THEME.surface, border: `1px solid ${THEME.line}`,
+          borderRadius: THEME.rMd, boxShadow: THEME.shadowSm,
+        }}>
+          <div style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 14, color: THEME.ink, marginBottom: 8 }}>
             {selectedDay}
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
-            <Chip bg="#1E3A5F" tx="#60A5FA">{selectedSession.workout_type}</Chip>
-            {selectedSession.duration_min && <Chip bg="#1E3A5F" tx="#60A5FA">⏱ {selectedSession.duration_min}m</Chip>}
-            {selectedSession.overall_feel && <Chip bg="#1E1B4B" tx="#A78BFA">{"⭐".repeat(selectedSession.overall_feel)}</Chip>}
+            <Chip bg="#D9E4FB" tx="#5A7CC4">{selectedSession.workout_type}</Chip>
+            {selectedSession.duration_min && <Chip bg="#D9E4FB" tx="#5A7CC4">⏱ {selectedSession.duration_min}m</Chip>}
+            {selectedSession.overall_feel && <Chip bg="#E6DCFF" tx="#8C6BD9">{"⭐".repeat(selectedSession.overall_feel)}</Chip>}
           </div>
           {selectedSession.gym_exercises?.length > 0 && (
-            <div style={{ fontSize: 12, color: "#64748B", fontFamily: FONTS.sans }}>
+            <div style={{ fontSize: 12, color: THEME.inkSoft, fontFamily: FONTS.sans }}>
               {selectedSession.gym_exercises.map(e => e.exercise_name).join(" · ")}
             </div>
           )}
           {selectedSession.notes && (
-            <div style={{ marginTop: 8, fontSize: 12, color: "#94A3B8", fontFamily: FONTS.sans, fontStyle: "italic" }}>
+            <div style={{ marginTop: 8, fontSize: 12, color: THEME.inkMuted, fontFamily: FONTS.sans, fontStyle: "italic" }}>
               "{selectedSession.notes}"
             </div>
           )}
@@ -168,16 +166,25 @@ export function CalendarTab({ userId, sessions }) {
       )}
 
       {selectedDay && !selectedSession && calData[selectedDay]?.type === "rest" && (
-        <div style={{ marginTop: 20, padding: "14px 16px", background: "rgba(15,23,42,0.6)", border: "1px solid #1E293B", borderRadius: 14, display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{
+          marginTop: 20, padding: "14px 16px",
+          background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`,
+          borderRadius: THEME.rMd, display: "flex", alignItems: "center", gap: 10,
+        }}>
           <span style={{ fontSize: 20 }}>🌙</span>
           <div>
-            <div style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 13, color: "#94A3B8" }}>Rest Day</div>
-            <div style={{ fontSize: 11, color: "#475569", fontFamily: FONTS.sans }}>{selectedDay}</div>
+            <div style={{ fontFamily: FONTS.nunito, fontWeight: 700, fontSize: 13, color: THEME.inkSoft }}>Rest Day</div>
+            <div style={{ fontSize: 11, color: THEME.inkFaint, fontFamily: FONTS.sans }}>{selectedDay}</div>
           </div>
         </div>
       )}
+
       {selectedDay && !selectedSession && calData[selectedDay] && calData[selectedDay].type !== "rest" && (
-        <div style={{ marginTop: 20, padding: "12px 16px", background: "rgba(15,23,42,0.6)", border: "1px solid rgba(59,130,246,0.1)", borderRadius: 14, fontSize: 12, color: "#475569", fontFamily: FONTS.sans }}>
+        <div style={{
+          marginTop: 20, padding: "12px 16px",
+          background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`,
+          borderRadius: THEME.rMd, fontSize: 12, color: THEME.inkSoft, fontFamily: FONTS.sans,
+        }}>
           Workout on {selectedDay} — view in History tab for details.
         </div>
       )}
@@ -187,7 +194,10 @@ export function CalendarTab({ userId, sessions }) {
 
 function NavBtn({ onClick, children }) {
   return (
-    <button onClick={onClick} style={{ background: "rgba(30,41,59,0.6)", border: "1px solid #1E293B", borderRadius: 6, color: "#94A3B8", fontSize: 14, padding: "4px 10px", cursor: "pointer" }}>
+    <button onClick={onClick} style={{
+      background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`,
+      borderRadius: THEME.rSm, color: THEME.inkSoft, fontSize: 14, padding: "4px 10px", cursor: "pointer",
+    }}>
       {children}
     </button>
   );
@@ -195,7 +205,7 @@ function NavBtn({ onClick, children }) {
 
 function Chip({ bg, tx, children }) {
   return (
-    <span style={{ fontSize: 11, fontFamily: FONTS.mono, padding: "3px 8px", borderRadius: 6, background: bg, color: tx }}>
+    <span style={{ fontSize: 11, fontFamily: FONTS.mono, padding: "3px 8px", borderRadius: THEME.rPill, background: bg, color: tx }}>
       {children}
     </span>
   );

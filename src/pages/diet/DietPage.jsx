@@ -3,7 +3,7 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
   Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
-import { FONTS, DIET_MEAL_DEFS } from "../../lib/constants.js";
+import { FONTS, THEME, DIET_MEAL_DEFS } from "../../lib/constants.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import {
   getDietLogsForDate, getDietLogsForRange,
@@ -16,7 +16,6 @@ import { Input } from "../../components/ui/Input.jsx";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
-// Use local date to avoid UTC offset skipping dates in non-UTC timezones
 function today() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -63,29 +62,38 @@ function getPhotoUrl(storagePath, supabaseUrl) {
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
+// Warm macro colors
+const MC = {
+  cal:  { color: "#6BAD3A", bg: "#DCEFC8" },
+  pro:  { color: "#5A7CC4", bg: "#D9E4FB" },
+  carb: { color: "#D69B1F", bg: "#FFEDC2" },
+  fat:  { color: "#D6395B", bg: "#FFD6DF" },
+};
+
 // ─── sub-components ───────────────────────────────────────────────────────────
 
 function DailyTotalsBar({ meals }) {
   const t = totals(meals);
   const chips = [
-    { label: "kcal",    value: t.cal,         color: "#4ADE80" },
-    { label: "protein", value: `${t.pro}g`,   color: "#22D3EE" },
-    { label: "carbs",   value: `${t.carb}g`,  color: "#FCD34D" },
-    { label: "fat",     value: `${t.fat}g`,   color: "#F87171" },
+    { label: "kcal",    value: t.cal,         ...MC.cal  },
+    { label: "protein", value: `${t.pro}g`,   ...MC.pro  },
+    { label: "carbs",   value: `${t.carb}g`,  ...MC.carb },
+    { label: "fat",     value: `${t.fat}g`,   ...MC.fat  },
   ];
   return (
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
       {chips.map(c => (
         <div key={c.label} style={{
-          background: "rgba(255,255,255,0.04)",
-          border: `1px solid ${c.color}30`,
-          borderRadius: 10, padding: "8px 14px",
+          background: c.bg,
+          border: `1px solid ${c.color}44`,
+          borderRadius: THEME.rMd, padding: "8px 14px",
           display: "flex", flexDirection: "column", alignItems: "center", minWidth: 68,
+          boxShadow: THEME.shadowSm,
         }}>
-          <span style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 18, color: c.color }}>
+          <span style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 18, color: c.color }}>
             {c.value}
           </span>
-          <span style={{ fontFamily: FONTS.mono, fontSize: 9, color: "#475569", textTransform: "uppercase", letterSpacing: 1 }}>
+          <span style={{ fontFamily: FONTS.mono, fontSize: 9, color: THEME.inkMuted, textTransform: "uppercase", letterSpacing: 1 }}>
             {c.label}
           </span>
         </div>
@@ -99,11 +107,11 @@ function FoodItemRow({ item, onDelete }) {
   return (
     <div style={{
       display: "flex", alignItems: "center", gap: 10,
-      padding: "8px 0", borderBottom: "1px solid rgba(255,255,255,0.04)",
+      padding: "8px 0", borderBottom: `1px solid ${THEME.line}`,
     }}>
       <div style={{
-        width: 42, height: 42, borderRadius: 8, flexShrink: 0,
-        background: "#1E293B", overflow: "hidden",
+        width: 42, height: 42, borderRadius: THEME.rSm, flexShrink: 0,
+        background: THEME.bgAlt, overflow: "hidden",
         display: "flex", alignItems: "center", justifyContent: "center",
         fontSize: 20,
       }}>
@@ -113,16 +121,16 @@ function FoodItemRow({ item, onDelete }) {
         }
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: FONTS.sans, fontSize: 13, color: "#E2E8F0", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <div style={{ fontFamily: FONTS.sans, fontSize: 13, color: THEME.ink, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {item.food_name}
         </div>
-        <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: "#64748B", marginTop: 2 }}>
+        <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: THEME.inkMuted, marginTop: 2 }}>
           {item.weight_g}g · {Math.round(item.calories)} kcal · {item.protein_g}g P · {item.carbs_g}g C · {item.fat_g}g F
         </div>
       </div>
       <button
         onClick={() => onDelete(item.id)}
-        style={{ background: "none", border: "none", color: "#475569", fontSize: 14, padding: "4px 6px", flexShrink: 0 }}
+        style={{ background: "none", border: "none", color: THEME.inkFaint, fontSize: 14, padding: "4px 6px", flexShrink: 0, cursor: "pointer" }}
       >
         ✕
       </button>
@@ -136,16 +144,18 @@ function MealCard({ meal, onAddFood, onUpdateTime, onDeleteMeal, onDeleteFood })
 
   return (
     <div style={{
-      background: "rgba(15,23,42,0.6)",
-      border: "1px solid rgba(255,255,255,0.06)",
-      borderRadius: 14, marginBottom: 12, overflow: "hidden",
+      background: THEME.surface,
+      border: `1px solid ${THEME.line}`,
+      borderRadius: THEME.rMd, marginBottom: 12, overflow: "hidden",
+      boxShadow: THEME.shadowSm,
     }}>
       <div style={{
         display: "flex", alignItems: "center", gap: 8,
-        padding: "12px 16px", borderBottom: "1px solid rgba(255,255,255,0.05)",
+        padding: "12px 16px", borderBottom: `1px solid ${THEME.line}`,
+        background: THEME.surfaceAlt,
       }}>
         <span style={{ fontSize: 18 }}>{icon}</span>
-        <span style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 14, color: "#E2E8F0", flex: 1 }}>
+        <span style={{ fontFamily: FONTS.nunito, fontWeight: 700, fontSize: 14, color: THEME.ink, flex: 1 }}>
           {label}
         </span>
         <input
@@ -154,14 +164,14 @@ function MealCard({ meal, onAddFood, onUpdateTime, onDeleteMeal, onDeleteFood })
           onChange={e => onUpdateTime(meal.id, e.target.value)}
           style={{
             background: "transparent", border: "none",
-            fontFamily: FONTS.mono, fontSize: 11, color: "#64748B",
+            fontFamily: FONTS.mono, fontSize: 11, color: THEME.inkFaint,
             cursor: "pointer",
           }}
         />
         {isSnack && (
           <button
             onClick={() => onDeleteMeal(meal.id)}
-            style={{ background: "none", border: "none", color: "#475569", fontSize: 13, marginLeft: 4 }}
+            style={{ background: "none", border: "none", color: THEME.inkFaint, fontSize: 13, marginLeft: 4, cursor: "pointer" }}
           >
             🗑
           </button>
@@ -169,7 +179,7 @@ function MealCard({ meal, onAddFood, onUpdateTime, onDeleteMeal, onDeleteFood })
       </div>
       <div style={{ padding: "0 16px" }}>
         {(meal.diet_items || []).length === 0 ? (
-          <div style={{ padding: "12px 0", fontFamily: FONTS.sans, fontSize: 12, color: "#334155", textAlign: "center" }}>
+          <div style={{ padding: "12px 0", fontFamily: FONTS.sans, fontSize: 12, color: THEME.inkFaint, textAlign: "center" }}>
             Nothing logged yet
           </div>
         ) : (
@@ -182,9 +192,9 @@ function MealCard({ meal, onAddFood, onUpdateTime, onDeleteMeal, onDeleteFood })
         <button
           onClick={() => onAddFood(meal.id)}
           style={{
-            width: "100%", padding: "7px", borderRadius: 8,
-            background: "transparent", border: "1px dashed rgba(74,222,128,0.25)",
-            color: "#4ADE80", fontFamily: FONTS.sans, fontSize: 12,
+            width: "100%", padding: "7px", borderRadius: THEME.rSm,
+            background: "#DCEFC8", border: "1px dashed #CADBB5",
+            color: "#6BAD3A", fontFamily: FONTS.sans, fontSize: 12, cursor: "pointer",
           }}
         >
           + Add Food
@@ -196,24 +206,24 @@ function MealCard({ meal, onAddFood, onUpdateTime, onDeleteMeal, onDeleteFood })
 
 function NutritionCard({ nutrition }) {
   const chips = [
-    { label: "kcal",    value: nutrition.calories,       color: "#4ADE80" },
-    { label: "protein", value: `${nutrition.protein_g}g`, color: "#22D3EE" },
-    { label: "carbs",   value: `${nutrition.carbs_g}g`,   color: "#FCD34D" },
-    { label: "fat",     value: `${nutrition.fat_g}g`,     color: "#F87171" },
+    { label: "kcal",    value: nutrition.calories,        ...MC.cal  },
+    { label: "protein", value: `${nutrition.protein_g}g`, ...MC.pro  },
+    { label: "carbs",   value: `${nutrition.carbs_g}g`,   ...MC.carb },
+    { label: "fat",     value: `${nutrition.fat_g}g`,     ...MC.fat  },
   ];
   return (
     <div style={{
-      background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.15)",
-      borderRadius: 10, padding: "12px 14px", marginTop: 12,
+      background: "#DCEFC8", border: "1px solid #CADBB5",
+      borderRadius: THEME.rSm, padding: "12px 14px", marginTop: 12,
     }}>
-      <div style={{ fontFamily: FONTS.sans, fontSize: 12, color: "#4ADE80", marginBottom: 8, fontWeight: 500 }}>
+      <div style={{ fontFamily: FONTS.sans, fontSize: 12, color: "#6BAD3A", marginBottom: 8, fontWeight: 600 }}>
         ✓ {nutrition.food_name}
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         {chips.map(c => (
           <div key={c.label} style={{
-            background: `${c.color}15`, border: `1px solid ${c.color}30`,
-            borderRadius: 6, padding: "4px 10px",
+            background: c.bg, border: `1px solid ${c.color}44`,
+            borderRadius: THEME.rSm, padding: "4px 10px",
             fontFamily: FONTS.mono, fontSize: 11, color: c.color,
           }}>
             {c.value} {c.label}
@@ -224,7 +234,6 @@ function NutritionCard({ nutrition }) {
   );
 }
 
-// Input component passes value string directly (not an event), so handlers accept value, not e
 function AddFoodModal({ open, onClose, onSave, saving }) {
   const [foodName, setFoodName]         = useState("");
   const [weightG, setWeightG]           = useState("");
@@ -288,16 +297,16 @@ function AddFoodModal({ open, onClose, onSave, saving }) {
       <div
         onClick={() => fileRef.current?.click()}
         style={{
-          width: "100%", height: 90, borderRadius: 10, marginBottom: 14,
-          background: photoPreview ? "transparent" : "rgba(255,255,255,0.03)",
-          border: "1px dashed rgba(255,255,255,0.1)",
+          width: "100%", height: 90, borderRadius: THEME.rSm, marginBottom: 14,
+          background: photoPreview ? "transparent" : THEME.surfaceAlt,
+          border: `1px dashed ${THEME.lineStrong}`,
           display: "flex", alignItems: "center", justifyContent: "center",
           cursor: "pointer", overflow: "hidden",
         }}
       >
         {photoPreview
           ? <img src={photoPreview} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          : <span style={{ fontFamily: FONTS.sans, fontSize: 12, color: "#475569" }}>📷 Add Photo (optional)</span>
+          : <span style={{ fontFamily: FONTS.sans, fontSize: 12, color: THEME.inkFaint }}>📷 Add Photo (optional)</span>
         }
       </div>
       <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{ display: "none" }} onChange={handlePhotoChange} />
@@ -322,19 +331,19 @@ function AddFoodModal({ open, onClose, onSave, saving }) {
         onClick={handleFetch}
         disabled={fetching || !foodName.trim() || !weightG}
         style={{
-          width: "100%", padding: "10px", borderRadius: 10,
-          background: fetching || !foodName.trim() || !weightG ? "#1E293B" : "rgba(74,222,128,0.12)",
-          border: "1px solid rgba(74,222,128,0.25)",
-          color: fetching || !foodName.trim() || !weightG ? "#475569" : "#4ADE80",
+          width: "100%", padding: "10px", borderRadius: THEME.rSm,
+          background: fetching || !foodName.trim() || !weightG ? THEME.surfaceAlt : "#DCEFC8",
+          border: `1px solid ${fetching || !foodName.trim() || !weightG ? THEME.line : "#CADBB5"}`,
+          color: fetching || !foodName.trim() || !weightG ? THEME.inkFaint : "#6BAD3A",
           fontFamily: FONTS.sans, fontSize: 13, fontWeight: 500,
-          marginBottom: 4,
+          marginBottom: 4, cursor: "pointer",
         }}
       >
         {fetching ? "Fetching nutrition…" : "Fetch Nutrition"}
       </button>
 
       {fetchError && (
-        <div style={{ color: "#F87171", fontFamily: FONTS.sans, fontSize: 12, marginTop: 8 }}>
+        <div style={{ color: "#D6395B", fontFamily: FONTS.sans, fontSize: 12, marginTop: 8 }}>
           ⚠ {fetchError}
         </div>
       )}
@@ -345,11 +354,11 @@ function AddFoodModal({ open, onClose, onSave, saving }) {
         onClick={handleSave}
         disabled={!nutrition || saving}
         style={{
-          width: "100%", padding: "11px", borderRadius: 10, marginTop: 14,
-          background: !nutrition || saving ? "#1E293B" : "#4ADE80",
+          width: "100%", padding: "11px", borderRadius: THEME.rSm, marginTop: 14,
+          background: !nutrition || saving ? THEME.surfaceAlt : "#6BAD3A",
           border: "none",
-          color: !nutrition || saving ? "#475569" : "#0F172A",
-          fontFamily: FONTS.syne, fontSize: 14, fontWeight: 700,
+          color: !nutrition || saving ? THEME.inkFaint : "#fff",
+          fontFamily: FONTS.nunito, fontSize: 14, fontWeight: 700, cursor: "pointer",
         }}
       >
         {saving ? "Saving…" : "Save Food Item"}
@@ -369,7 +378,7 @@ const INSIGHT_RANGES = [
 
 function InsightsTab({ insightData, loading, range, onRangeChange, dailyMeals, selectedDate }) {
   const tooltipStyle = {
-    background: "#0D1117", border: "1px solid #1E293B",
+    background: THEME.surface, border: `1px solid ${THEME.line}`,
     borderRadius: 8, fontFamily: FONTS.sans, fontSize: 11,
   };
 
@@ -380,18 +389,18 @@ function InsightsTab({ insightData, loading, range, onRangeChange, dailyMeals, s
           key={r.key}
           onClick={() => onRangeChange(r.key)}
           style={{
-            padding: "6px 16px", borderRadius: 20, border: "1px solid",
-            borderColor: range === r.key ? "#4ADE80" : "#1E293B",
-            background: range === r.key ? "rgba(74,222,128,0.12)" : "transparent",
-            color: range === r.key ? "#4ADE80" : "#4A5568",
-            fontFamily: FONTS.sans, fontSize: 12,
+            padding: "6px 16px", borderRadius: THEME.rPill, border: "1px solid",
+            borderColor: range === r.key ? "#6BAD3A" : THEME.line,
+            background: range === r.key ? "#DCEFC8" : THEME.surfaceAlt,
+            color: range === r.key ? "#6BAD3A" : THEME.inkMuted,
+            fontFamily: FONTS.sans, fontSize: 12, cursor: "pointer",
           }}
         >{r.label}</button>
       ))}
     </div>
   );
 
-  // ── Day view: per-meal breakdown from dailyMeals ──────────────────────────
+  // ── Day view ────────────────────────────────────────────────────────────────
   if (range === "day") {
     const mealSummaries = (dailyMeals || []).map(meal => {
       const def = getMealLabel(meal.meal_type);
@@ -404,80 +413,77 @@ function InsightsTab({ insightData, loading, range, onRangeChange, dailyMeals, s
       }
       return { label: def.label, icon: def.icon, cal: Math.round(cal), pro: Math.round(pro * 10) / 10, carb: Math.round(carb * 10) / 10, fat: Math.round(fat * 10) / 10 };
     });
-    const totalCal = mealSummaries.reduce((s, m) => s + m.cal, 0);
-    const totalPro = Math.round(mealSummaries.reduce((s, m) => s + m.pro, 0) * 10) / 10;
+    const totalCal  = mealSummaries.reduce((s, m) => s + m.cal,  0);
+    const totalPro  = Math.round(mealSummaries.reduce((s, m) => s + m.pro,  0) * 10) / 10;
     const totalCarb = Math.round(mealSummaries.reduce((s, m) => s + m.carb, 0) * 10) / 10;
-    const totalFat = Math.round(mealSummaries.reduce((s, m) => s + m.fat, 0) * 10) / 10;
-
+    const totalFat  = Math.round(mealSummaries.reduce((s, m) => s + m.fat,  0) * 10) / 10;
     const activeMeals = mealSummaries.filter(m => m.cal > 0);
 
     return (
       <div>
         <RangeToggle />
-        <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: "#475569", letterSpacing: 1, textTransform: "uppercase", marginBottom: 12 }}>
+        <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: THEME.inkMuted, letterSpacing: 1, textTransform: "uppercase", marginBottom: 12 }}>
           {selectedDate === today() ? "Today" : fmt(selectedDate)}
         </div>
 
-        {/* Day totals */}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24 }}>
           {[
-            { label: "Total Calories", value: `${totalCal} kcal`, color: "#4ADE80" },
-            { label: "Protein",        value: `${totalPro}g`,     color: "#22D3EE" },
-            { label: "Carbs",          value: `${totalCarb}g`,    color: "#FCD34D" },
-            { label: "Fat",            value: `${totalFat}g`,     color: "#F87171" },
+            { label: "Total Calories", value: `${totalCal} kcal`, ...MC.cal  },
+            { label: "Protein",        value: `${totalPro}g`,     ...MC.pro  },
+            { label: "Carbs",          value: `${totalCarb}g`,    ...MC.carb },
+            { label: "Fat",            value: `${totalFat}g`,     ...MC.fat  },
           ].map(c => (
             <div key={c.label} style={{
-              background: "rgba(255,255,255,0.03)", border: `1px solid ${c.color}25`,
-              borderRadius: 10, padding: "10px 14px", flex: 1, minWidth: 90,
+              background: c.bg, border: `1px solid ${c.color}44`,
+              borderRadius: THEME.rMd, padding: "10px 14px", flex: 1, minWidth: 90,
+              boxShadow: THEME.shadowSm,
             }}>
-              <div style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 18, color: c.color }}>{c.value}</div>
-              <div style={{ fontFamily: FONTS.mono, fontSize: 9, color: "#475569", textTransform: "uppercase", letterSpacing: 1, marginTop: 2 }}>{c.label}</div>
+              <div style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 18, color: c.color }}>{c.value}</div>
+              <div style={{ fontFamily: FONTS.mono, fontSize: 9, color: THEME.inkMuted, textTransform: "uppercase", letterSpacing: 1, marginTop: 2 }}>{c.label}</div>
             </div>
           ))}
         </div>
 
-        {/* Per-meal calorie bars */}
         {activeMeals.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "32px 0", color: "#334155", fontFamily: FONTS.sans, fontSize: 13 }}>
+          <div style={{ textAlign: "center", padding: "32px 0", color: THEME.inkFaint, fontFamily: FONTS.sans, fontSize: 13 }}>
             No food logged yet for this day
           </div>
         ) : (
           <>
-            <div style={{ marginBottom: 8, fontFamily: FONTS.mono, fontSize: 10, color: "#475569", letterSpacing: 1, textTransform: "uppercase" }}>
+            <div style={{ marginBottom: 8, fontFamily: FONTS.mono, fontSize: 10, color: THEME.inkMuted, letterSpacing: 1, textTransform: "uppercase" }}>
               Calories by Meal
             </div>
             {activeMeals.map(m => (
               <div key={m.label} style={{ marginBottom: 14 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                  <span style={{ fontFamily: FONTS.sans, fontSize: 13, color: "#94A3B8" }}>{m.icon} {m.label}</span>
-                  <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: "#E2E8F0" }}>{m.cal} kcal</span>
+                  <span style={{ fontFamily: FONTS.sans, fontSize: 13, color: THEME.inkSoft }}>{m.icon} {m.label}</span>
+                  <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: THEME.ink }}>{m.cal} kcal</span>
                 </div>
-                <div style={{ height: 6, background: "#1E293B", borderRadius: 3, overflow: "hidden" }}>
+                <div style={{ height: 6, background: THEME.bgAlt, borderRadius: 3, overflow: "hidden" }}>
                   <div style={{
-                    height: "100%", borderRadius: 3, background: "#4ADE80",
+                    height: "100%", borderRadius: 3, background: "#6BAD3A",
                     width: totalCal > 0 ? `${(m.cal / totalCal) * 100}%` : "0%",
                     transition: "width 0.4s ease",
                   }} />
                 </div>
-                <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: "#475569", marginTop: 4 }}>
+                <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: THEME.inkMuted, marginTop: 4 }}>
                   P {m.pro}g · C {m.carb}g · F {m.fat}g
                 </div>
               </div>
             ))}
 
-            {/* Meal macro bar chart */}
-            <div style={{ marginTop: 20, marginBottom: 8, fontFamily: FONTS.mono, fontSize: 10, color: "#475569", letterSpacing: 1, textTransform: "uppercase" }}>
+            <div style={{ marginTop: 20, marginBottom: 8, fontFamily: FONTS.mono, fontSize: 10, color: THEME.inkMuted, letterSpacing: 1, textTransform: "uppercase" }}>
               Macros by Meal (g)
             </div>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={activeMeals} margin={{ top: 4, right: 4, bottom: 0, left: -28 }}>
-                <XAxis dataKey="label" tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: "#334155" }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: "#334155" }} tickLine={false} axisLine={false} />
+                <XAxis dataKey="label" tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: THEME.inkFaint }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: THEME.inkFaint }} tickLine={false} axisLine={false} />
                 <Tooltip contentStyle={tooltipStyle} />
                 <Legend wrapperStyle={{ fontFamily: FONTS.sans, fontSize: 11 }} />
-                <Bar dataKey="pro"  name="Protein" stackId="a" fill="#22D3EE" radius={[0,0,0,0]} />
-                <Bar dataKey="carb" name="Carbs"   stackId="a" fill="#FCD34D" radius={[0,0,0,0]} />
-                <Bar dataKey="fat"  name="Fat"     stackId="a" fill="#F87171" radius={[3,3,0,0]} />
+                <Bar dataKey="pro"  name="Protein" stackId="a" fill={MC.pro.color}  radius={[0,0,0,0]} />
+                <Bar dataKey="carb" name="Carbs"   stackId="a" fill={MC.carb.color} radius={[0,0,0,0]} />
+                <Bar dataKey="fat"  name="Fat"     stackId="a" fill={MC.fat.color}  radius={[3,3,0,0]} />
               </BarChart>
             </ResponsiveContainer>
           </>
@@ -490,12 +496,12 @@ function InsightsTab({ insightData, loading, range, onRangeChange, dailyMeals, s
     return (
       <div>
         <RangeToggle />
-        <div style={{ textAlign: "center", padding: 40, color: "#334155", fontFamily: FONTS.sans }}>Loading…</div>
+        <div style={{ textAlign: "center", padding: 40, color: THEME.inkFaint, fontFamily: FONTS.sans }}>Loading…</div>
       </div>
     );
   }
 
-  // ── Year view: aggregate insightData by month ─────────────────────────────
+  // ── Year view ────────────────────────────────────────────────────────────────
   if (range === "year") {
     const macroByMonth = {};
     for (const meal of insightData) {
@@ -537,51 +543,52 @@ function InsightsTab({ insightData, loading, range, onRangeChange, dailyMeals, s
         <RangeToggle />
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24 }}>
           {[
-            { label: "Avg Daily Cal (active months)", value: avgCal + " kcal", color: "#4ADE80" },
-            { label: "Avg Daily Protein",             value: avgPro + "g",     color: "#22D3EE" },
-            { label: "Months Logged",                 value: `${monthsLogged}/12`, color: "#A78BFA" },
+            { label: "Avg Daily Cal (active months)", value: avgCal + " kcal", ...MC.cal  },
+            { label: "Avg Daily Protein",             value: avgPro + "g",     ...MC.pro  },
+            { label: "Months Logged",                 value: `${monthsLogged}/12`, color: "#8C6BD9", bg: "#E6DCFF" },
           ].map(c => (
             <div key={c.label} style={{
-              background: "rgba(255,255,255,0.03)", border: `1px solid ${c.color}25`,
-              borderRadius: 10, padding: "10px 14px", flex: 1, minWidth: 100,
+              background: c.bg, border: `1px solid ${c.color}44`,
+              borderRadius: THEME.rMd, padding: "10px 14px", flex: 1, minWidth: 100,
+              boxShadow: THEME.shadowSm,
             }}>
-              <div style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 20, color: c.color }}>{c.value}</div>
-              <div style={{ fontFamily: FONTS.mono, fontSize: 9, color: "#475569", textTransform: "uppercase", letterSpacing: 1, marginTop: 2 }}>{c.label}</div>
+              <div style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 20, color: c.color }}>{c.value}</div>
+              <div style={{ fontFamily: FONTS.mono, fontSize: 9, color: THEME.inkMuted, textTransform: "uppercase", letterSpacing: 1, marginTop: 2 }}>{c.label}</div>
             </div>
           ))}
         </div>
 
-        <div style={{ marginBottom: 8, fontFamily: FONTS.mono, fontSize: 10, color: "#475569", letterSpacing: 1, textTransform: "uppercase" }}>
+        <div style={{ marginBottom: 8, fontFamily: FONTS.mono, fontSize: 10, color: THEME.inkMuted, letterSpacing: 1, textTransform: "uppercase" }}>
           Avg Daily Calories by Month
         </div>
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={yearChartData} margin={{ top: 4, right: 4, bottom: 0, left: -28 }}>
-            <XAxis dataKey="date" tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: "#334155" }} tickLine={false} axisLine={false} />
-            <YAxis tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: "#334155" }} tickLine={false} axisLine={false} />
+            <XAxis dataKey="date" tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: THEME.inkFaint }} tickLine={false} axisLine={false} />
+            <YAxis tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: THEME.inkFaint }} tickLine={false} axisLine={false} />
             <Tooltip contentStyle={tooltipStyle} />
-            <Bar dataKey="calories" fill="#4ADE80" radius={[3,3,0,0]} />
+            <Bar dataKey="calories" fill={MC.cal.color} radius={[3,3,0,0]} />
           </BarChart>
         </ResponsiveContainer>
 
-        <div style={{ margin: "20px 0 8px", fontFamily: FONTS.mono, fontSize: 10, color: "#475569", letterSpacing: 1, textTransform: "uppercase" }}>
+        <div style={{ margin: "20px 0 8px", fontFamily: FONTS.mono, fontSize: 10, color: THEME.inkMuted, letterSpacing: 1, textTransform: "uppercase" }}>
           Avg Daily Macros by Month (g)
         </div>
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={yearChartData} margin={{ top: 4, right: 4, bottom: 0, left: -28 }}>
-            <XAxis dataKey="date" tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: "#334155" }} tickLine={false} axisLine={false} />
-            <YAxis tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: "#334155" }} tickLine={false} axisLine={false} />
+            <XAxis dataKey="date" tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: THEME.inkFaint }} tickLine={false} axisLine={false} />
+            <YAxis tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: THEME.inkFaint }} tickLine={false} axisLine={false} />
             <Tooltip contentStyle={tooltipStyle} />
             <Legend wrapperStyle={{ fontFamily: FONTS.sans, fontSize: 11 }} />
-            <Bar dataKey="protein" stackId="a" fill="#22D3EE" radius={[0,0,0,0]} />
-            <Bar dataKey="carbs"   stackId="a" fill="#FCD34D" radius={[0,0,0,0]} />
-            <Bar dataKey="fat"     stackId="a" fill="#F87171" radius={[3,3,0,0]} />
+            <Bar dataKey="protein" stackId="a" fill={MC.pro.color}  radius={[0,0,0,0]} />
+            <Bar dataKey="carbs"   stackId="a" fill={MC.carb.color} radius={[0,0,0,0]} />
+            <Bar dataKey="fat"     stackId="a" fill={MC.fat.color}  radius={[3,3,0,0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
     );
   }
 
-  // ── Week / Month view ─────────────────────────────────────────────────────
+  // ── Week / Month view ────────────────────────────────────────────────────────
   const macroByDate = {};
   for (const meal of insightData) {
     const d = meal.log_date;
@@ -617,44 +624,45 @@ function InsightsTab({ insightData, loading, range, onRangeChange, dailyMeals, s
       <RangeToggle />
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24 }}>
         {[
-          { label: "Avg Daily Calories", value: avgCal + " kcal", color: "#4ADE80" },
-          { label: "Avg Daily Protein",  value: avgPro + "g",     color: "#22D3EE" },
-          { label: "Days Logged",        value: `${daysLogged}/${days}`, color: "#A78BFA" },
+          { label: "Avg Daily Calories", value: avgCal + " kcal",        ...MC.cal  },
+          { label: "Avg Daily Protein",  value: avgPro + "g",            ...MC.pro  },
+          { label: "Days Logged",        value: `${daysLogged}/${days}`, color: "#8C6BD9", bg: "#E6DCFF" },
         ].map(c => (
           <div key={c.label} style={{
-            background: "rgba(255,255,255,0.03)", border: `1px solid ${c.color}25`,
-            borderRadius: 10, padding: "10px 14px", flex: 1, minWidth: 100,
+            background: c.bg, border: `1px solid ${c.color}44`,
+            borderRadius: THEME.rMd, padding: "10px 14px", flex: 1, minWidth: 100,
+            boxShadow: THEME.shadowSm,
           }}>
-            <div style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 20, color: c.color }}>{c.value}</div>
-            <div style={{ fontFamily: FONTS.mono, fontSize: 9, color: "#475569", textTransform: "uppercase", letterSpacing: 1, marginTop: 2 }}>{c.label}</div>
+            <div style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 20, color: c.color }}>{c.value}</div>
+            <div style={{ fontFamily: FONTS.mono, fontSize: 9, color: THEME.inkMuted, textTransform: "uppercase", letterSpacing: 1, marginTop: 2 }}>{c.label}</div>
           </div>
         ))}
       </div>
 
-      <div style={{ marginBottom: 8, fontFamily: FONTS.mono, fontSize: 10, color: "#475569", letterSpacing: 1, textTransform: "uppercase" }}>
+      <div style={{ marginBottom: 8, fontFamily: FONTS.mono, fontSize: 10, color: THEME.inkMuted, letterSpacing: 1, textTransform: "uppercase" }}>
         Daily Calories
       </div>
       <ResponsiveContainer width="100%" height={180}>
         <LineChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -28 }}>
-          <XAxis dataKey="date" tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: "#334155" }} tickLine={false} axisLine={false} interval={range === "week" ? 0 : 4} />
-          <YAxis tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: "#334155" }} tickLine={false} axisLine={false} />
+          <XAxis dataKey="date" tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: THEME.inkFaint }} tickLine={false} axisLine={false} interval={range === "week" ? 0 : 4} />
+          <YAxis tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: THEME.inkFaint }} tickLine={false} axisLine={false} />
           <Tooltip contentStyle={tooltipStyle} />
-          <Line type="monotone" dataKey="calories" stroke="#4ADE80" strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="calories" stroke={MC.cal.color} strokeWidth={2} dot={false} />
         </LineChart>
       </ResponsiveContainer>
 
-      <div style={{ margin: "20px 0 8px", fontFamily: FONTS.mono, fontSize: 10, color: "#475569", letterSpacing: 1, textTransform: "uppercase" }}>
+      <div style={{ margin: "20px 0 8px", fontFamily: FONTS.mono, fontSize: 10, color: THEME.inkMuted, letterSpacing: 1, textTransform: "uppercase" }}>
         Macro Breakdown (g)
       </div>
       <ResponsiveContainer width="100%" height={180}>
         <BarChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -28 }}>
-          <XAxis dataKey="date" tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: "#334155" }} tickLine={false} axisLine={false} interval={range === "week" ? 0 : 4} />
-          <YAxis tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: "#334155" }} tickLine={false} axisLine={false} />
+          <XAxis dataKey="date" tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: THEME.inkFaint }} tickLine={false} axisLine={false} interval={range === "week" ? 0 : 4} />
+          <YAxis tick={{ fontFamily: FONTS.mono, fontSize: 9, fill: THEME.inkFaint }} tickLine={false} axisLine={false} />
           <Tooltip contentStyle={tooltipStyle} />
           <Legend wrapperStyle={{ fontFamily: FONTS.sans, fontSize: 11 }} />
-          <Bar dataKey="protein" stackId="a" fill="#22D3EE" radius={[0,0,0,0]} />
-          <Bar dataKey="carbs"   stackId="a" fill="#FCD34D" radius={[0,0,0,0]} />
-          <Bar dataKey="fat"     stackId="a" fill="#F87171" radius={[3,3,0,0]} />
+          <Bar dataKey="protein" stackId="a" fill={MC.pro.color}  radius={[0,0,0,0]} />
+          <Bar dataKey="carbs"   stackId="a" fill={MC.carb.color} radius={[0,0,0,0]} />
+          <Bar dataKey="fat"     stackId="a" fill={MC.fat.color}  radius={[3,3,0,0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -675,7 +683,6 @@ export default function DietPage() {
   const [insightData,    setInsightData]    = useState([]);
   const [insightLoading, setInsightLoading] = useState(false);
 
-  // ── load day ────────────────────────────────────────────────────────────────
   const loadDay = useCallback(async (date) => {
     if (!user) return;
     setLoading(true);
@@ -694,7 +701,6 @@ export default function DietPage() {
         );
         rows = await getDietLogsForDate(user.id, date);
       } else {
-        // Migrate old sort_orders (0,1,2) to new scale (0,10,20) so integer snacks fit
         const migrations = [];
         for (const def of DIET_MEAL_DEFS) {
           const meal = rows.find(r => r.meal_type === def.type);
@@ -715,7 +721,6 @@ export default function DietPage() {
 
   useEffect(() => { loadDay(selectedDate); }, [loadDay, selectedDate]);
 
-  // ── load insights ────────────────────────────────────────────────────────────
   const loadInsights = useCallback(async (range) => {
     if (!user) return;
     setInsightLoading(true);
@@ -724,7 +729,7 @@ export default function DietPage() {
       if      (range === "week")  start = addDays(today(), -6);
       else if (range === "month") start = addDays(today(), -29);
       else if (range === "year")  start = addDays(today(), -364);
-      else return; // "day" uses dailyMeals — no DB call needed
+      else return;
       const data = await getDietLogsForRange(user.id, start, today());
       setInsightData(data);
     } finally {
@@ -736,8 +741,7 @@ export default function DietPage() {
     if (activeTab === "insights" && insightRange !== "day") loadInsights(insightRange);
   }, [activeTab, insightRange, loadInsights]);
 
-  // ── handlers ─────────────────────────────────────────────────────────────────
-  const handleAddFood = (mealId) => setAddFoodModal({ open: true, mealId });
+  const handleAddFood    = (mealId) => setAddFoodModal({ open: true, mealId });
 
   const handleSaveFood = async ({ nutrition, photoFile }) => {
     if (!addFoodModal.mealId) return;
@@ -752,17 +756,17 @@ export default function DietPage() {
     }
   };
 
-  const handleUpdateTime = async (mealId, time) => {
+  const handleUpdateTime  = async (mealId, time) => {
     await updateMealTime(mealId, time);
     setMeals(prev => prev.map(m => m.id === mealId ? { ...m, meal_time: time } : m));
   };
 
-  const handleDeleteMeal = async (mealId) => {
+  const handleDeleteMeal  = async (mealId) => {
     await deleteMeal(mealId);
     setMeals(prev => prev.filter(m => m.id !== mealId));
   };
 
-  const handleDeleteFood = async (itemId) => {
+  const handleDeleteFood  = async (itemId) => {
     await deleteFoodItem(itemId);
     setMeals(prev => prev.map(m => ({
       ...m,
@@ -771,13 +775,12 @@ export default function DietPage() {
   };
 
   const handleAddSnack = async (parentSortOrder) => {
-    // Count existing snacks already in this slot (parent+1 … parent+9) to avoid collisions
     const snacksInSlot = meals.filter(m =>
       m.meal_type === "snack" &&
       m.sort_order > parentSortOrder &&
       m.sort_order < parentSortOrder + 10
     ).length;
-    const snackSortOrder = parentSortOrder + 5 + snacksInSlot; // always an integer
+    const snackSortOrder = parentSortOrder + 5 + snacksInSlot;
     const meal = await createMeal(user.id, {
       log_date: selectedDate,
       meal_type: "snack",
@@ -789,23 +792,18 @@ export default function DietPage() {
   };
 
   const isToday = selectedDate === today();
-
   const sortedMeals = [...meals].sort((a, b) => a.sort_order - b.sort_order);
 
-  // Build mealRows: insert snack_btn RIGHT BEFORE dinner (captures lunch-slot snacks above it)
-  // and at the very end (captures dinner-slot snacks above it)
   const mealRows = [];
   const lunchMeal  = sortedMeals.find(m => m.meal_type === "lunch");
   const dinnerMeal = sortedMeals.find(m => m.meal_type === "dinner");
   for (let i = 0; i < sortedMeals.length; i++) {
     const meal = sortedMeals[i];
-    // Insert snack_btn slot just before the dinner card
     if (meal.meal_type === "dinner" && lunchMeal) {
       mealRows.push({ type: "snack_btn", parentSortOrder: lunchMeal.sort_order });
     }
     mealRows.push({ type: "meal", data: meal });
   }
-  // Snack slot after dinner
   if (dinnerMeal) {
     mealRows.push({ type: "snack_btn", parentSortOrder: dinnerMeal.sort_order });
   }
@@ -813,23 +811,23 @@ export default function DietPage() {
   return (
     <div style={{
       minHeight: "100%",
-      background: "radial-gradient(ellipse at top, #021A0A 0%, #08091A 55%)",
+      background: THEME.bg,
       fontFamily: FONTS.sans,
     }}>
       <div style={{ padding: "24px 20px 80px", maxWidth: 760, margin: "0 auto" }}>
 
         {/* Header */}
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontFamily: FONTS.syne, fontWeight: 800, fontSize: 26, color: "#F1F5F9" }}>
+          <div style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 26, color: THEME.ink }}>
             🥗 Diet
           </div>
-          <div style={{ fontSize: 11, color: "#4ADE80", fontFamily: FONTS.mono, marginTop: 2 }}>
+          <div style={{ fontSize: 11, color: "#6BAD3A", fontFamily: FONTS.mono, marginTop: 2 }}>
             Track every meal · every day
           </div>
         </div>
 
         {/* Tabs */}
-        <div style={{ display: "flex", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: 24 }}>
+        <div style={{ display: "flex", borderBottom: `1px solid ${THEME.line}`, marginBottom: 24 }}>
           {[
             { key: "today",    label: "Today",    icon: "🍽️" },
             { key: "insights", label: "Insights", icon: "📊" },
@@ -839,10 +837,10 @@ export default function DietPage() {
               onClick={() => setActiveTab(tab.key)}
               style={{
                 padding: "10px 16px", background: "transparent", border: "none",
-                borderBottom: activeTab === tab.key ? "2px solid #4ADE80" : "2px solid transparent",
-                color: activeTab === tab.key ? "#4ADE80" : "#4A5568",
+                borderBottom: activeTab === tab.key ? "2px solid #6BAD3A" : "2px solid transparent",
+                color: activeTab === tab.key ? "#6BAD3A" : THEME.inkMuted,
                 fontFamily: FONTS.sans, fontSize: 13, fontWeight: 500,
-                marginBottom: -1,
+                marginBottom: -1, cursor: "pointer",
               }}
             >
               {tab.icon} {tab.label}
@@ -853,50 +851,41 @@ export default function DietPage() {
         {/* ── Today Tab ── */}
         {activeTab === "today" && (
           <>
-            {/* Date nav with calendar picker */}
+            {/* Date nav */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
               <button
                 onClick={() => setSelectedDate(d => addDays(d, -1))}
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid #1E293B", color: "#94A3B8", borderRadius: 8, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12 }}
-              >
-                ←
-              </button>
+                style={{ background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`, color: THEME.inkSoft, borderRadius: THEME.rSm, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12, cursor: "pointer" }}
+              >←</button>
 
-              {/* Clickable date — opens native date picker */}
               <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-                <span style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 15, color: "#E2E8F0", userSelect: "none" }}>
+                <span style={{ fontFamily: FONTS.nunito, fontWeight: 700, fontSize: 15, color: THEME.ink, userSelect: "none" }}>
                   {isToday ? "Today" : fmt(selectedDate)}
                 </span>
-                <span style={{ fontSize: 13, color: "#4A5568" }}>📅</span>
+                <span style={{ fontSize: 13, color: THEME.inkFaint }}>📅</span>
                 <input
                   type="date"
                   value={selectedDate}
                   max={today()}
                   onChange={(e) => { if (e.target.value) setSelectedDate(e.target.value); }}
-                  style={{
-                    position: "absolute", inset: 0, opacity: 0,
-                    cursor: "pointer", width: "100%", height: "100%",
-                    fontSize: 16,
-                  }}
+                  style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%", height: "100%", fontSize: 16 }}
                 />
               </div>
 
               <button
                 onClick={() => !isToday && setSelectedDate(d => addDays(d, 1))}
                 style={{
-                  background: isToday ? "transparent" : "rgba(255,255,255,0.05)",
-                  border: "1px solid #1E293B",
-                  color: isToday ? "#1E293B" : "#94A3B8",
-                  borderRadius: 8, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12,
+                  background: isToday ? "transparent" : THEME.surfaceAlt,
+                  border: `1px solid ${THEME.line}`,
+                  color: isToday ? THEME.line : THEME.inkSoft,
+                  borderRadius: THEME.rSm, padding: "6px 12px", fontFamily: FONTS.mono, fontSize: 12,
                   cursor: isToday ? "default" : "pointer",
                 }}
-              >
-                →
-              </button>
+              >→</button>
             </div>
 
             {loading ? (
-              <div style={{ textAlign: "center", padding: 40, color: "#334155", fontFamily: FONTS.sans }}>Loading…</div>
+              <div style={{ textAlign: "center", padding: 40, color: THEME.inkFaint, fontFamily: FONTS.sans }}>Loading…</div>
             ) : (
               <>
                 <DailyTotalsBar meals={meals} />
@@ -915,9 +904,9 @@ export default function DietPage() {
                       <button
                         onClick={() => handleAddSnack(row.parentSortOrder)}
                         style={{
-                          background: "transparent", border: "1px dashed rgba(255,255,255,0.08)",
-                          borderRadius: 8, padding: "5px 16px", color: "#334155",
-                          fontFamily: FONTS.sans, fontSize: 11,
+                          background: THEME.surfaceAlt, border: `1px dashed ${THEME.lineStrong}`,
+                          borderRadius: THEME.rSm, padding: "5px 16px", color: THEME.inkMuted,
+                          fontFamily: FONTS.sans, fontSize: 11, cursor: "pointer",
                         }}
                       >
                         + Add Snack Here

@@ -1,10 +1,20 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth.js";
 import { getHeatmapData } from "../../lib/db.js";
 import { useTracker } from "../../hooks/useTracker.js";
 import { PageHeader } from "../../components/layout/PageHeader.jsx";
 import { StatBadge } from "../../components/ui/StatBadge.jsx";
-import { TRACKED_TASKS, FONTS } from "../../lib/constants.js";
+import { TRACKED_TASKS, FONTS, THEME } from "../../lib/constants.js";
+
+function cellColor(count, total) {
+  if (!count) return THEME.bgAlt;
+  const pct = count / total;
+  if (pct >= 0.9) return "#6BAD3A";
+  if (pct >= 0.7) return THEME.primary;
+  if (pct >= 0.5) return "#D69B1F";
+  if (pct >= 0.3) return "#F0DAAB";
+  return "#FFEDC2";
+}
 
 function YearHeatmap({ heatmap, year }) {
   const weeks = [];
@@ -18,7 +28,7 @@ function YearHeatmap({ heatmap, year }) {
       if (dayIdx < 0 || dayIdx >= 366) { days.push(null); continue; }
       const date = new Date(startDate);
       date.setDate(date.getDate() + dayIdx);
-      const key = date.toISOString().split("T")[0];
+      const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
       if (date > new Date()) { days.push({ key, future: true }); continue; }
       const entry = heatmap[key];
       const count = entry?.count || 0;
@@ -27,17 +37,7 @@ function YearHeatmap({ heatmap, year }) {
     weeks.push(days);
   }
 
-  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-  const cellColor = (count, total) => {
-    if (!count) return "#0D1117";
-    const pct = count / total;
-    if (pct >= 0.9) return "#22C55E";
-    if (pct >= 0.7) return "#4ADE80";
-    if (pct >= 0.5) return "#7DD3FC";
-    if (pct >= 0.3) return "#FCD34D";
-    return "#FCA5A5";
-  };
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
   return (
     <div style={{ overflowX: "auto" }}>
@@ -51,7 +51,7 @@ function YearHeatmap({ heatmap, year }) {
                 style={{
                   width: 12, height: 12, borderRadius: 2,
                   background: !day || day.future ? "transparent" : cellColor(day.count, day.total || 10),
-                  border: day && !day.future ? `1px solid ${cellColor(day.count, day.total || 10)}44` : "1px solid #1E293B22",
+                  border: `1px solid ${day && !day.future ? cellColor(day.count, day.total || 10) + "66" : THEME.line + "44"}`,
                   opacity: day?.future ? 0.2 : 1,
                 }}
               />
@@ -59,12 +59,12 @@ function YearHeatmap({ heatmap, year }) {
           </div>
         ))}
       </div>
-      <div style={{ display: "flex", gap: 2, marginTop: 6 }}>
-        <span style={{ fontSize: 9, color: "#2D3748", fontFamily: FONTS.mono, marginRight: 4 }}>Less</span>
-        {["#0D1117", "#FCA5A5", "#FCD34D", "#7DD3FC", "#4ADE80", "#22C55E"].map((c, i) => (
-          <div key={i} style={{ width: 12, height: 12, borderRadius: 2, background: c, border: "1px solid #1E293B" }} />
+      <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 8 }}>
+        <span style={{ fontSize: 9, color: THEME.inkFaint, fontFamily: FONTS.mono, marginRight: 4 }}>Less</span>
+        {[0, 0.2, 0.45, 0.65, 0.85, 1].map((p, i) => (
+          <div key={i} style={{ width: 12, height: 12, borderRadius: 2, background: cellColor(p * 10, 10) }} />
         ))}
-        <span style={{ fontSize: 9, color: "#2D3748", fontFamily: FONTS.mono, marginLeft: 4 }}>More</span>
+        <span style={{ fontSize: 9, color: THEME.inkFaint, fontFamily: FONTS.mono, marginLeft: 4 }}>More</span>
       </div>
     </div>
   );
@@ -96,50 +96,60 @@ export default function AnalyticsPage() {
   const now = new Date().getFullYear();
 
   return (
-    <div style={{ padding: "24px 20px 40px", maxWidth: 900, margin: "0 auto", fontFamily: FONTS.sans }}>
+    <div style={{ padding: "24px 20px 40px", maxWidth: 900, margin: "0 auto", fontFamily: FONTS.sans, background: THEME.bg, minHeight: "100vh" }}>
       <PageHeader title="Analytics" icon="📈" subtitle="Trends, heatmap, and task performance." />
 
       {/* Year nav */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-        <button onClick={() => setYear(y => y - 1)} style={{ background: "transparent", border: "none", color: "#4A5568", fontSize: 16, cursor: "pointer" }}>‹</button>
-        <span style={{ fontFamily: FONTS.mono, fontSize: 13, color: "#94A3B8" }}>{year}</span>
-        <button onClick={() => setYear(y => y + 1)} disabled={year >= now} style={{ background: "transparent", border: "none", color: year >= now ? "#1E293B" : "#4A5568", fontSize: 16, cursor: year >= now ? "default" : "pointer" }}>›</button>
+        <button onClick={() => setYear(y => y - 1)} style={{ background: "transparent", border: "none", color: THEME.inkSoft, fontSize: 18, cursor: "pointer", lineHeight: 1 }}>‹</button>
+        <span style={{ fontFamily: FONTS.mono, fontSize: 13, color: THEME.ink }}>{year}</span>
+        <button onClick={() => setYear(y => y + 1)} disabled={year >= now} style={{ background: "transparent", border: "none", color: year >= now ? THEME.inkFaint : THEME.inkSoft, fontSize: 18, cursor: year >= now ? "default" : "pointer", lineHeight: 1 }}>›</button>
       </div>
 
       {/* Stats row */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-        <StatBadge label="Active Days" value={totalDaysTracked} color="#4ADE80" />
-        <StatBadge label="Best Streak" value={`${bestStreak}d`} color="#FCD34D" />
-        <StatBadge label="Avg Completion" value={`${avgCompletion}%`} color="#7DD3FC" />
+      <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
+        <StatBadge label="Active Days" value={totalDaysTracked} color="#6BAD3A" />
+        <StatBadge label="Best Streak" value={`${bestStreak}d`} color="#E58A2D" />
+        <StatBadge label="Avg Completion" value={`${avgCompletion}%`} color={THEME.primary} />
       </div>
 
       {/* Heatmap */}
-      <div style={{ padding: "20px", borderRadius: 16, background: "#0D1117", border: "1px solid #1E293B", marginBottom: 24 }}>
-        <div style={{ fontFamily: FONTS.mono, fontSize: 9, color: "#4A5568", letterSpacing: 3, textTransform: "uppercase", marginBottom: 14 }}>
+      <div style={{
+        padding: "20px", borderRadius: THEME.rMd,
+        background: THEME.surface, border: `1px solid ${THEME.line}`,
+        boxShadow: THEME.shadowSm, marginBottom: 24,
+      }}>
+        <div style={{ fontFamily: FONTS.mono, fontSize: 9, color: THEME.inkMuted, letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 14 }}>
           {year} Activity Heatmap
         </div>
         {loading ? (
-          <div style={{ color: "#2D3748", fontSize: 12, fontFamily: FONTS.mono }}>Loading...</div>
+          <div style={{ color: THEME.inkFaint, fontSize: 12, fontFamily: FONTS.mono }}>Loading...</div>
         ) : (
           <YearHeatmap heatmap={heatmap} year={year} />
         )}
       </div>
 
       {/* Task performance */}
-      <div style={{ padding: "20px", borderRadius: 16, background: "#0D1117", border: "1px solid #1E293B" }}>
-        <div style={{ fontFamily: FONTS.mono, fontSize: 9, color: "#4A5568", letterSpacing: 3, textTransform: "uppercase", marginBottom: 14 }}>
+      <div style={{
+        padding: "20px", borderRadius: THEME.rMd,
+        background: THEME.surface, border: `1px solid ${THEME.line}`,
+        boxShadow: THEME.shadowSm,
+      }}>
+        <div style={{ fontFamily: FONTS.mono, fontSize: 9, color: THEME.inkMuted, letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 14 }}>
           30-Day Task Performance
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {taskRates.map(task => (
             <div key={task.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <span style={{ fontSize: 16, width: 24, textAlign: "center", flexShrink: 0 }}>{task.icon}</span>
-              <div style={{ width: 120, fontSize: 12, color: "#94A3B8", flexShrink: 0 }}>{task.label}</div>
-              <div style={{ flex: 1, height: 8, borderRadius: 4, background: "#1E293B", overflow: "hidden" }}>
-                <div style={{ height: "100%", borderRadius: 4, background: task.bd, width: `${task.rate}%`, transition: "width 0.5s" }} />
+              <div style={{ width: 120, fontSize: 12, color: THEME.inkSoft, flexShrink: 0, fontFamily: FONTS.sans }}>{task.label}</div>
+              <div style={{ flex: 1, height: 8, borderRadius: THEME.rPill, background: THEME.bgAlt, overflow: "hidden" }}>
+                <div style={{ height: "100%", borderRadius: THEME.rPill, background: task.tx, width: `${task.rate}%`, transition: "width 0.5s" }} />
               </div>
               <div style={{ fontFamily: FONTS.mono, fontSize: 12, color: task.tx, width: 36, textAlign: "right", flexShrink: 0 }}>{task.rate}%</div>
-              {task.streak > 0 && <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: "#FCD34D", width: 36, flexShrink: 0 }}>🔥{task.streak}d</div>}
+              {task.streak > 0 && (
+                <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: "#E58A2D", width: 40, flexShrink: 0 }}>🔥{task.streak}d</div>
+              )}
             </div>
           ))}
         </div>

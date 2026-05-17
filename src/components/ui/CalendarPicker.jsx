@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { FONTS } from "../../lib/constants.js";
+import { FONTS, THEME } from "../../lib/constants.js";
 
 function todayStr() {
   const d = new Date();
@@ -33,7 +33,6 @@ export function CalendarPicker({ value, onChange, label, maxDate }) {
   const [viewMonth, setViewMonth] = useState(initMonth);
   const containerRef = useRef(null);
 
-  // Sync view when value changes externally
   useEffect(() => {
     if (value) {
       setViewYear(Number(value.split("-")[0]));
@@ -79,7 +78,7 @@ export function CalendarPicker({ value, onChange, label, maxDate }) {
   return (
     <div ref={containerRef} style={{ position: "relative" }}>
       {label && (
-        <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: "#4A5568", letterSpacing: 1, marginBottom: 6, textTransform: "uppercase" }}>
+        <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: THEME.inkMuted, letterSpacing: 1, marginBottom: 6, textTransform: "uppercase" }}>
           {label}
         </div>
       )}
@@ -87,39 +86,39 @@ export function CalendarPicker({ value, onChange, label, maxDate }) {
         type="button"
         onClick={() => setOpen(o => !o)}
         style={{
-          width: "100%", textAlign: "left", background: "#0D1117", border: "1px solid #1E293B",
-          borderRadius: 8, padding: "10px 14px", color: value ? "#E2E8F0" : "#4A5568",
+          width: "100%", textAlign: "left", background: THEME.surface, border: `1.5px solid ${THEME.line}`,
+          borderRadius: THEME.rSm, padding: "10px 14px", color: value ? THEME.ink : THEME.inkFaint,
           fontFamily: FONTS.sans, fontSize: 14, cursor: "pointer",
           display: "flex", alignItems: "center", justifyContent: "space-between",
         }}
       >
         <span>{formatDisplay(value)}</span>
-        <span style={{ color: "#4A5568", fontSize: 12 }}>📅</span>
+        <span style={{ color: THEME.inkFaint, fontSize: 12 }}>📅</span>
       </button>
 
       {open && (
         <div style={{
           position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 1000,
-          background: "#0D1117", border: "1px solid #1E293B", borderRadius: 12,
-          padding: 16, minWidth: 260, boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+          background: THEME.surface, border: `1px solid ${THEME.line}`, borderRadius: THEME.rMd,
+          padding: 16, minWidth: 260, boxShadow: THEME.shadowMd,
         }}>
           {/* Month navigation */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <button
               type="button" onClick={prevMonth}
-              style={{ background: "transparent", border: "none", color: "#4A5568", fontSize: 18, cursor: "pointer", padding: "2px 8px", lineHeight: 1 }}
+              style={{ background: "transparent", border: "none", color: THEME.inkSoft, fontSize: 18, cursor: "pointer", padding: "2px 8px", lineHeight: 1 }}
             >‹</button>
-            <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: "#94A3B8", letterSpacing: 0.5 }}>{monthLabel}</span>
+            <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: THEME.inkSoft, letterSpacing: 0.5 }}>{monthLabel}</span>
             <button
               type="button" onClick={nextMonth}
-              style={{ background: "transparent", border: "none", color: atMax ? "#2D3748" : "#4A5568", fontSize: 18, cursor: atMax ? "default" : "pointer", padding: "2px 8px", lineHeight: 1 }}
+              style={{ background: "transparent", border: "none", color: atMax ? THEME.inkFaint : THEME.inkSoft, fontSize: 18, cursor: atMax ? "default" : "pointer", padding: "2px 8px", lineHeight: 1 }}
             >›</button>
           </div>
 
           {/* Day grid */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 3 }}>
             {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(d => (
-              <div key={d} style={{ textAlign: "center", fontFamily: FONTS.mono, fontSize: 9, color: "#2D3748", padding: "3px 0" }}>{d}</div>
+              <div key={d} style={{ textAlign: "center", fontFamily: FONTS.mono, fontSize: 9, color: THEME.inkFaint, padding: "3px 0" }}>{d}</div>
             ))}
             {blanks.map((_, i) => <div key={`b${i}`} />)}
             {days.map(day => {
@@ -133,12 +132,12 @@ export function CalendarPicker({ value, onChange, label, maxDate }) {
                   onClick={() => !isFuture && selectDay(day)}
                   style={{
                     height: 34, display: "flex", alignItems: "center", justifyContent: "center",
-                    borderRadius: 7, cursor: isFuture ? "default" : "pointer",
-                    background: isSelected ? "#022c22" : "transparent",
-                    border: `1px solid ${isSelected ? "#115E59" : isToday ? "#FCD34D44" : "transparent"}`,
-                    opacity: isFuture ? 0.25 : 1,
-                    fontFamily: FONTS.syne, fontWeight: 600, fontSize: 13,
-                    color: isSelected ? "#4ADE80" : isToday ? "#FCD34D" : "#94A3B8",
+                    borderRadius: THEME.rSm, cursor: isFuture ? "default" : "pointer",
+                    background: isSelected ? THEME.primarySoft : isToday ? THEME.bgAlt : "transparent",
+                    border: `1px solid ${isSelected ? THEME.primary : isToday ? THEME.lineStrong : "transparent"}`,
+                    opacity: isFuture ? 0.3 : 1,
+                    fontFamily: FONTS.nunito, fontWeight: isSelected ? 700 : 600, fontSize: 13,
+                    color: isSelected ? THEME.primary : isToday ? THEME.ink : THEME.inkSoft,
                     transition: "background 0.15s",
                   }}
                 >

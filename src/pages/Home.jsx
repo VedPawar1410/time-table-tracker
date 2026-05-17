@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { C, FONTS } from "../lib/constants.js";
+import { C, FONTS, THEME } from "../lib/constants.js";
+import Chip from "../components/ui/Chip.jsx";
 
 const weekdaySchedule = [
   { time: "7:30 – 7:45 AM",      cat: "routine",    label: "Wake up + Quick Freshen",    note: "Brush, face wash only — save the full bath for after gym" },
@@ -52,14 +53,33 @@ const rules = [
 function Block({ time, cat, label, note, tag }) {
   const c = C[cat];
   return (
-    <div style={{ display: "flex", gap: 14, padding: "11px 16px", borderRadius: 10, background: c.bg, border: `1px solid ${c.bd}`, marginBottom: 5 }}>
-      <div style={{ minWidth: 148, fontFamily: FONTS.mono, fontSize: 10.5, color: "#3D5068", paddingTop: 3, lineHeight: 1.4 }}>{time}</div>
+    <div style={{
+      display: "flex", gap: 14, padding: "11px 16px",
+      borderRadius: THEME.rSm, background: c.bg,
+      border: `1px solid ${c.bd}`, marginBottom: 5,
+    }}>
+      <div style={{
+        minWidth: 148, fontFamily: FONTS.mono, fontSize: 10.5,
+        color: THEME.inkMuted, paddingTop: 3, lineHeight: 1.4,
+      }}>
+        {time}
+      </div>
       <div style={{ flex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ color: c.tx, fontWeight: 500, fontSize: 13.5 }}>{label}</span>
-          {tag && <span style={{ fontSize: 9.5, padding: "2px 7px", borderRadius: 4, background: c.bd + "99", color: c.tx, fontFamily: FONTS.mono, letterSpacing: 0.3 }}>{tag}</span>}
+          <span style={{ color: c.tx, fontWeight: 600, fontSize: 13.5, fontFamily: FONTS.nunito }}>{label}</span>
+          {tag && (
+            <span style={{
+              fontSize: 9.5, padding: "2px 7px", borderRadius: THEME.rPill,
+              background: c.bd + "66", color: c.tx,
+              fontFamily: FONTS.mono, letterSpacing: "0.04em",
+            }}>
+              {tag}
+            </span>
+          )}
         </div>
-        {note && <div style={{ color: "#3D5068", fontSize: 12, marginTop: 3, lineHeight: 1.5 }}>{note}</div>}
+        {note && (
+          <div style={{ color: THEME.inkMuted, fontSize: 12, marginTop: 3, lineHeight: 1.5 }}>{note}</div>
+        )}
       </div>
     </div>
   );
@@ -75,39 +95,42 @@ export default function Home() {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", fontFamily: FONTS.sans, color: "#E2E8F0", padding: "28px 20px 60px" }}>
+    <div style={{ minHeight: "100vh", fontFamily: FONTS.sans, color: THEME.ink, padding: "28px 20px 60px", background: THEME.bg }}>
       <div style={{ maxWidth: 760, margin: "0 auto" }}>
 
         <div style={{ marginBottom: 32 }}>
-          <div style={{ fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 4, color: "#4ADE80", textTransform: "uppercase", marginBottom: 10 }}>
+          <div style={{ fontFamily: FONTS.mono, fontSize: 10, letterSpacing: "0.22em", color: THEME.primary, textTransform: "uppercase", marginBottom: 10 }}>
             Personal Productivity System · 22 · Hyderabad
           </div>
-          <h1 style={{ fontFamily: FONTS.syne, fontSize: 36, fontWeight: 800, lineHeight: 1.1, marginBottom: 8, letterSpacing: -1 }}>
+          <h1 style={{ fontFamily: FONTS.nunito, fontSize: 36, fontWeight: 900, lineHeight: 1.1, marginBottom: 8, letterSpacing: -0.5, color: THEME.ink }}>
             Your Master<br />Timetable
           </h1>
-          <p style={{ color: "#3D5068", fontSize: 13.5, lineHeight: 1.7 }}>
+          <p style={{ color: THEME.inkSoft, fontSize: 13.5, lineHeight: 1.7 }}>
             Built around your 11–8 office schedule · Job prep as top priority · Morning gym · Weekend freedom
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
+        {/* Tab bar */}
+        <div style={{ display: "flex", gap: 6, marginBottom: 24, flexWrap: "wrap" }}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{
-              padding: "8px 18px", borderRadius: 8,
-              border: `1px solid ${tab === t.id ? "#4ADE80" : "#1E293B"}`,
-              background: tab === t.id ? "#052E16" : "transparent",
-              color: tab === t.id ? "#4ADE80" : "#4A5568",
-              fontFamily: FONTS.sans, fontSize: 13, fontWeight: tab === t.id ? 500 : 400,
-              cursor: "pointer", transition: "all 0.15s",
-            }}>{t.label}</button>
+            <Chip
+              key={t.id}
+              label={t.label}
+              active={tab === t.id}
+              color={THEME.primary}
+              onClick={() => setTab(t.id)}
+            />
           ))}
         </div>
 
         {tab === "weekday" && (
           <div>
-            <div style={{ padding: "10px 14px", borderRadius: 8, background: "#0D1117", border: "1px solid #1E293B", marginBottom: 16 }}>
-              <span style={{ fontSize: 12, color: "#4A5568" }}>
-                ⏰ Wake time shifts from your current 9 AM → <strong style={{ color: "#94A3B8" }}>7:30 AM</strong>. That extra 1.5 hrs is where the gym lives.
+            <div style={{
+              padding: "10px 14px", borderRadius: THEME.rSm,
+              background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`, marginBottom: 16,
+            }}>
+              <span style={{ fontSize: 12, color: THEME.inkSoft }}>
+                ⏰ Wake time shifts from your current 9 AM → <strong style={{ color: THEME.ink }}>7:30 AM</strong>. That extra 1.5 hrs is where the gym lives.
               </span>
             </div>
             {weekdaySchedule.map((b, i) => <Block key={i} {...b} />)}
@@ -116,25 +139,40 @@ export default function Home() {
 
         {tab === "evening" && (
           <div>
-            <div style={{ padding: "10px 14px", borderRadius: 8, background: "#0D1117", border: "1px solid #1E293B", marginBottom: 20 }}>
-              <span style={{ fontSize: 12.5, color: "#4A5568", lineHeight: 1.6 }}>
-                Every weekday from <strong style={{ color: "#94A3B8" }}>10:50 PM – 12:00 AM</strong>:
+            <div style={{
+              padding: "10px 14px", borderRadius: THEME.rSm,
+              background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`, marginBottom: 20,
+            }}>
+              <span style={{ fontSize: 12.5, color: THEME.inkSoft, lineHeight: 1.6 }}>
+                Every weekday from <strong style={{ color: THEME.ink }}>10:50 PM – 12:00 AM</strong>:
               </span>
             </div>
             <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8 }}>
               {rotation.map(r => (
-                <div key={r.day} style={{ flex: "0 0 130px", borderRadius: 10, border: "1px solid #1E293B", background: "#0D1117", overflow: "hidden" }}>
-                  <div style={{ background: "#111827", padding: "10px 12px", borderBottom: "1px solid #1E293B" }}>
-                    <div style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 18, color: "#E2E8F0" }}>{r.day}</div>
-                    <div style={{ fontSize: 11, color: "#4A5568", fontFamily: FONTS.mono }}>{r.sub}</div>
+                <div key={r.day} style={{
+                  flex: "0 0 130px", borderRadius: THEME.rMd,
+                  border: `1px solid ${THEME.line}`,
+                  background: THEME.surface,
+                  boxShadow: THEME.shadowSm,
+                  overflow: "hidden",
+                }}>
+                  <div style={{
+                    background: THEME.surfaceAlt, padding: "10px 12px",
+                    borderBottom: `1px solid ${THEME.line}`,
+                  }}>
+                    <div style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 18, color: THEME.ink }}>{r.day}</div>
+                    <div style={{ fontSize: 11, color: THEME.inkMuted, fontFamily: FONTS.mono }}>{r.sub}</div>
                   </div>
                   <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 6 }}>
                     {r.items.map((item, i) => {
                       const c = C[item.cat];
                       return (
-                        <div key={i} style={{ padding: "9px 10px", borderRadius: 8, background: c.bg, border: `1px solid ${c.bd}` }}>
-                          <div style={{ color: c.tx, fontSize: 12, fontWeight: 500, marginBottom: 2 }}>{item.label}</div>
-                          <div style={{ color: "#3D5068", fontSize: 10.5, fontFamily: FONTS.mono }}>{item.dur}</div>
+                        <div key={i} style={{
+                          padding: "9px 10px", borderRadius: THEME.rSm,
+                          background: c.bg, border: `1px solid ${c.bd}`,
+                        }}>
+                          <div style={{ color: c.tx, fontSize: 12, fontWeight: 600, fontFamily: FONTS.nunito, marginBottom: 2 }}>{item.label}</div>
+                          <div style={{ color: THEME.inkMuted, fontSize: 10.5, fontFamily: FONTS.mono }}>{item.dur}</div>
                         </div>
                       );
                     })}
@@ -142,8 +180,11 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 16, padding: "12px 16px", borderRadius: 10, background: "#12052E", border: "1px solid #5B21B6" }}>
-              <span style={{ fontSize: 12.5, color: "#A78BFA", lineHeight: 1.6 }}>
+            <div style={{
+              marginTop: 16, padding: "12px 16px", borderRadius: THEME.rSm,
+              background: C.ps5.bg, border: `1px solid ${C.ps5.bd}`,
+            }}>
+              <span style={{ fontSize: 12.5, color: C.ps5.tx, lineHeight: 1.6, fontWeight: 500 }}>
                 🎮 <strong>PS5 logic:</strong> 2 sessions per weekday week (Tue + Thu). Full unlimited gaming returns on weekends.
               </span>
             </div>
@@ -152,24 +193,34 @@ export default function Home() {
 
         {tab === "weekend" && (
           <div>
-            <div style={{ padding: "10px 14px", borderRadius: 8, background: "#0D1117", border: "1px solid #1E293B", marginBottom: 16 }}>
-              <span style={{ fontSize: 12.5, color: "#4A5568", lineHeight: 1.6 }}>
+            <div style={{
+              padding: "10px 14px", borderRadius: THEME.rSm,
+              background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`, marginBottom: 16,
+            }}>
+              <span style={{ fontSize: 12.5, color: THEME.inkSoft, lineHeight: 1.6 }}>
                 No fixed times. Work down this list in order. Once top priorities are done, the rest of the day is yours.
               </span>
             </div>
             {weekendList.map(p => {
               const c = C[p.cat];
               return (
-                <div key={p.rank} style={{ display: "flex", gap: 14, padding: "12px 16px", borderRadius: 10, background: c.bg, border: `1px solid ${c.bd}`, marginBottom: 5 }}>
-                  <div style={{ fontFamily: FONTS.mono, fontSize: 18, fontWeight: 500, color: "#1E2A3A", minWidth: 30, paddingTop: 3 }}>
+                <div key={p.rank} style={{
+                  display: "flex", gap: 14, padding: "12px 16px",
+                  borderRadius: THEME.rSm, background: c.bg,
+                  border: `1px solid ${c.bd}`, marginBottom: 5,
+                }}>
+                  <div style={{
+                    fontFamily: FONTS.mono, fontSize: 18, fontWeight: 700,
+                    color: c.tx, minWidth: 30, paddingTop: 3,
+                  }}>
                     {p.rank < 10 ? `0${p.rank}` : p.rank}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                      <span style={{ color: c.tx, fontWeight: 500, fontSize: 13.5 }}>{p.label}</span>
-                      <span style={{ fontSize: 10.5, color: "#3D5068", fontFamily: FONTS.mono }}>{p.time}</span>
+                      <span style={{ color: c.tx, fontWeight: 600, fontSize: 13.5, fontFamily: FONTS.nunito }}>{p.label}</span>
+                      <span style={{ fontSize: 10.5, color: THEME.inkMuted, fontFamily: FONTS.mono }}>{p.time}</span>
                     </div>
-                    <div style={{ color: "#3D5068", fontSize: 12, marginTop: 3, lineHeight: 1.5 }}>{p.note}</div>
+                    <div style={{ color: THEME.inkSoft, fontSize: 12, marginTop: 3, lineHeight: 1.5 }}>{p.note}</div>
                   </div>
                 </div>
               );
@@ -178,12 +229,21 @@ export default function Home() {
         )}
 
         {tab === "rules" && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
             {rules.map((r, i) => (
-              <div key={i} style={{ padding: "18px", borderRadius: 12, background: "#0D1117", border: "1px solid #1E293B" }}>
-                <div style={{ fontSize: 26, marginBottom: 10 }}>{r.icon}</div>
-                <div style={{ fontFamily: FONTS.syne, fontWeight: 700, fontSize: 14.5, marginBottom: 8, color: "#E2E8F0", lineHeight: 1.3 }}>{r.title}</div>
-                <div style={{ color: "#4A5568", fontSize: 12.5, lineHeight: 1.7 }}>{r.body}</div>
+              <div key={i} style={{
+                padding: "20px", borderRadius: THEME.rMd,
+                background: THEME.surface, border: `1px solid ${THEME.line}`,
+                boxShadow: THEME.shadowSm,
+              }}>
+                <div style={{ fontSize: 28, marginBottom: 10 }}>{r.icon}</div>
+                <div style={{
+                  fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 14.5,
+                  marginBottom: 8, color: THEME.ink, lineHeight: 1.3,
+                }}>
+                  {r.title}
+                </div>
+                <div style={{ color: THEME.inkSoft, fontSize: 12.5, lineHeight: 1.7 }}>{r.body}</div>
               </div>
             ))}
           </div>
