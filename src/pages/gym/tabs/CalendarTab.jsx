@@ -1,16 +1,30 @@
 import { useState, useEffect, useCallback } from "react";
-import { FONTS, THEME } from "../../../lib/constants.js";
+import { THEME, TASK_PALETTE, F, lighten } from "../../../lib/theme.js";
 import { getGymCalendarData } from "../../../lib/db.js";
+import Card from "../../../components/ui/Card.jsx";
 
+const p = TASK_PALETTE.gym;
 const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DAY_LABELS = ["M","T","W","T","F","S","S"];
 
 const TYPE_COLOR = {
-  weights: { dot: "#E8623A", label: "Weights" },
-  cardio:  { dot: "#6BAD3A", label: "Cardio" },
-  mixed:   { dot: "#8C6BD9", label: "Mixed" },
-  rest:    { dot: "#9C8170", label: "Rest Day" },
+  weights: { dot: TASK_PALETTE.gym.fg, label: "Strength" },
+  cardio:  { dot: TASK_PALETTE.diet.fg, label: "Cardio" },
+  mixed:   { dot: TASK_PALETTE.hobbies.fg, label: "Mixed" },
+  rest:    { dot: THEME.inkFaint, label: "Rest Day" },
 };
+
+function NavBtn({ onClick, children }) {
+  return (
+    <button onClick={onClick} style={{
+      background: THEME.surface, border: `1.5px solid ${THEME.line}`,
+      borderRadius: THEME.rSm, color: THEME.inkSoft, fontSize: 14,
+      padding: "5px 12px", cursor: "pointer", fontFamily: F.display, fontWeight: 700,
+    }}>
+      {children}
+    </button>
+  );
+}
 
 export function CalendarTab({ userId, sessions }) {
   const now = new Date();
@@ -60,18 +74,24 @@ export function CalendarTab({ userId, sessions }) {
   };
 
   const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const workoutsThisMonth = Object.values(calData).filter(e => e.type !== "rest").length;
 
   return (
-    <div>
-      {/* Nav */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+    <Card padding={24}>
+      {/* Month nav */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <NavBtn onClick={() => setYear(y => y - 1)}>«</NavBtn>
-          <span style={{ fontFamily: FONTS.mono, fontSize: 13, color: THEME.inkSoft, minWidth: 36, textAlign: "center" }}>{year}</span>
+          <span style={{ fontFamily: F.mono, fontSize: 12, color: THEME.inkSoft, minWidth: 36, textAlign: "center" }}>{year}</span>
           <NavBtn onClick={() => setYear(y => y + 1)}>»</NavBtn>
         </div>
-        <div style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 17, color: THEME.ink }}>
-          {MONTH_NAMES[month - 1]}
+        <div>
+          <div style={{ fontFamily: F.display, fontWeight: 900, fontSize: 18, color: THEME.ink, textAlign: "center" }}>
+            {MONTH_NAMES[month - 1]}
+          </div>
+          <div style={{ fontFamily: F.mono, fontSize: 11, color: p.fg, textAlign: "center", fontWeight: 700 }}>
+            {workoutsThisMonth} workout{workoutsThisMonth !== 1 ? "s" : ""} this month
+          </div>
         </div>
         <div style={{ display: "flex", gap: 6 }}>
           <NavBtn onClick={prevMonth}>‹</NavBtn>
@@ -80,11 +100,11 @@ export function CalendarTab({ userId, sessions }) {
       </div>
 
       {/* Legend */}
-      <div style={{ display: "flex", gap: 14, marginBottom: 16, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 14, marginBottom: 16, flexWrap: "wrap", justifyContent: "center" }}>
         {Object.entries(TYPE_COLOR).map(([type, { dot, label }]) => (
           <div key={type} style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: dot }} />
-            <span style={{ fontSize: 11, color: THEME.inkMuted, fontFamily: FONTS.sans }}>{label}</span>
+            <span style={{ fontSize: 11, color: THEME.inkMuted, fontFamily: F.body }}>{label}</span>
           </div>
         ))}
       </div>
@@ -92,13 +112,12 @@ export function CalendarTab({ userId, sessions }) {
       {/* Day headers */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, marginBottom: 6 }}>
         {DAY_LABELS.map((d, i) => (
-          <div key={i} style={{ textAlign: "center", fontSize: 9.5, color: THEME.inkFaint, fontFamily: FONTS.mono, textTransform: "uppercase" }}>{d}</div>
+          <div key={i} style={{ textAlign: "center", fontSize: 10, color: THEME.inkFaint, fontFamily: F.mono, textTransform: "uppercase", letterSpacing: 0.5 }}>{d}</div>
         ))}
       </div>
 
-      {/* Grid */}
       {loading ? (
-        <div style={{ textAlign: "center", padding: 30, color: THEME.inkFaint, fontFamily: FONTS.mono, fontSize: 11 }}>Loading...</div>
+        <div style={{ textAlign: "center", padding: 30, color: THEME.inkFaint, fontFamily: F.mono, fontSize: 11, letterSpacing: 2 }}>LOADING...</div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
           {cells.map((day, i) => {
@@ -107,106 +126,60 @@ export function CalendarTab({ userId, sessions }) {
             const entry = calData[dateKey];
             const isToday = dateKey === todayKey;
             const isSelected = dateKey === selectedDay;
-            const dotColor = entry ? (TYPE_COLOR[entry.type]?.dot || THEME.primary) : null;
+            const dotColor = entry ? (TYPE_COLOR[entry.type]?.dot || p.fg) : null;
 
             return (
               <div
                 key={i}
                 onClick={() => handleDayClick(day)}
                 style={{
-                  aspectRatio: "1",
-                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                  borderRadius: THEME.rSm, gap: 3,
+                  aspectRatio: "1", display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center", borderRadius: THEME.rSm, gap: 3,
                   cursor: entry ? "pointer" : "default",
-                  background: isSelected ? THEME.primarySoft : isToday ? THEME.surfaceAlt : "transparent",
-                  border: `1.5px solid ${isSelected ? THEME.primary : isToday ? THEME.line : "transparent"}`,
+                  background: isSelected ? lighten(p.fg, 0.78) : isToday ? THEME.surfaceAlt : "transparent",
+                  border: `1.5px solid ${isSelected ? lighten(p.fg, 0.55) : isToday ? THEME.line : "transparent"}`,
                   transition: "background 0.15s",
                 }}
-                onMouseEnter={e => { if (entry) e.currentTarget.style.background = THEME.bgAlt; }}
-                onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = isToday ? THEME.surfaceAlt : "transparent"; }}
               >
-                <span style={{ fontSize: 13, fontFamily: FONTS.mono, color: isToday ? THEME.ink : entry ? THEME.inkSoft : THEME.inkFaint }}>
+                <span style={{ fontSize: 12, fontFamily: F.mono, fontWeight: isToday ? 700 : 400, color: isToday ? THEME.ink : entry ? THEME.inkSoft : THEME.inkFaint }}>
                   {day}
                 </span>
                 {entry?.type === "rest"
-                  ? <span style={{ fontSize: 9, lineHeight: 1 }}>🌙</span>
-                  : dotColor && <div style={{ width: 5, height: 5, borderRadius: "50%", background: dotColor }} />}
+                  ? <span style={{ fontSize: 9 }}>🌙</span>
+                  : dotColor && <div style={{ width: 6, height: 6, borderRadius: "50%", background: dotColor }} />
+                }
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Selected day detail */}
       {selectedDay && selectedSession && (
         <div style={{
           marginTop: 20, padding: "14px 16px",
-          background: THEME.surface, border: `1px solid ${THEME.line}`,
-          borderRadius: THEME.rMd, boxShadow: THEME.shadowSm,
+          background: lighten(p.fg, 0.9), border: `1.5px solid ${lighten(p.fg, 0.7)}`,
+          borderRadius: THEME.rMd,
         }}>
-          <div style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 14, color: THEME.ink, marginBottom: 8 }}>
+          <div style={{ fontFamily: F.display, fontWeight: 800, fontSize: 14, color: THEME.ink, marginBottom: 8 }}>
             {selectedDay}
           </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
-            <Chip bg="#D9E4FB" tx="#5A7CC4">{selectedSession.workout_type}</Chip>
-            {selectedSession.duration_min && <Chip bg="#D9E4FB" tx="#5A7CC4">⏱ {selectedSession.duration_min}m</Chip>}
-            {selectedSession.overall_feel && <Chip bg="#E6DCFF" tx="#8C6BD9">{"⭐".repeat(selectedSession.overall_feel)}</Chip>}
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+            <span style={{ padding: "2px 8px", borderRadius: 999, background: lighten(TASK_PALETTE.book.fg, 0.82), color: TASK_PALETTE.book.fg, fontSize: 11, fontFamily: F.mono, fontWeight: 700 }}>
+              {selectedSession.workout_type}
+            </span>
+            {selectedSession.duration_min && (
+              <span style={{ padding: "2px 8px", borderRadius: 999, background: lighten(TASK_PALETTE.book.fg, 0.82), color: TASK_PALETTE.book.fg, fontSize: 11, fontFamily: F.mono, fontWeight: 700 }}>
+                ⏱ {selectedSession.duration_min}m
+              </span>
+            )}
           </div>
           {selectedSession.gym_exercises?.length > 0 && (
-            <div style={{ fontSize: 12, color: THEME.inkSoft, fontFamily: FONTS.sans }}>
+            <div style={{ fontSize: 12, color: THEME.inkSoft, fontFamily: F.body }}>
               {selectedSession.gym_exercises.map(e => e.exercise_name).join(" · ")}
             </div>
           )}
-          {selectedSession.notes && (
-            <div style={{ marginTop: 8, fontSize: 12, color: THEME.inkMuted, fontFamily: FONTS.sans, fontStyle: "italic" }}>
-              "{selectedSession.notes}"
-            </div>
-          )}
         </div>
       )}
-
-      {selectedDay && !selectedSession && calData[selectedDay]?.type === "rest" && (
-        <div style={{
-          marginTop: 20, padding: "14px 16px",
-          background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`,
-          borderRadius: THEME.rMd, display: "flex", alignItems: "center", gap: 10,
-        }}>
-          <span style={{ fontSize: 20 }}>🌙</span>
-          <div>
-            <div style={{ fontFamily: FONTS.nunito, fontWeight: 700, fontSize: 13, color: THEME.inkSoft }}>Rest Day</div>
-            <div style={{ fontSize: 11, color: THEME.inkFaint, fontFamily: FONTS.sans }}>{selectedDay}</div>
-          </div>
-        </div>
-      )}
-
-      {selectedDay && !selectedSession && calData[selectedDay] && calData[selectedDay].type !== "rest" && (
-        <div style={{
-          marginTop: 20, padding: "12px 16px",
-          background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`,
-          borderRadius: THEME.rMd, fontSize: 12, color: THEME.inkSoft, fontFamily: FONTS.sans,
-        }}>
-          Workout on {selectedDay} — view in History tab for details.
-        </div>
-      )}
-    </div>
-  );
-}
-
-function NavBtn({ onClick, children }) {
-  return (
-    <button onClick={onClick} style={{
-      background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`,
-      borderRadius: THEME.rSm, color: THEME.inkSoft, fontSize: 14, padding: "4px 10px", cursor: "pointer",
-    }}>
-      {children}
-    </button>
-  );
-}
-
-function Chip({ bg, tx, children }) {
-  return (
-    <span style={{ fontSize: 11, fontFamily: FONTS.mono, padding: "3px 8px", borderRadius: THEME.rPill, background: bg, color: tx }}>
-      {children}
-    </span>
+    </Card>
   );
 }

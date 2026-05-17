@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { FONTS, THEME, MUSCLE_GROUPS } from "../../../lib/constants.js";
+import { THEME, MUSCLE_GROUPS } from "../../../lib/constants.js";
+import { F } from "../../../lib/theme.js";
+const FONTS = { mono: F.mono, sans: F.body, nunito: F.display };
 import { CalendarPicker } from "../../../components/ui/CalendarPicker.jsx";
 import { createGymWorkout, upsertExerciseInLibrary, updateExercisePR, upsertLog } from "../../../lib/db.js";
 import { ExerciseBlock } from "./ExerciseBlock.jsx";

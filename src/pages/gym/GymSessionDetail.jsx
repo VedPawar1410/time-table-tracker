@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getGymSessionById, deleteGymWorkout } from "../../lib/db.js";
-import { FONTS, THEME } from "../../lib/constants.js";
+import { THEME } from "../../lib/constants.js";
+import { TASK_PALETTE, F, lighten } from "../../lib/theme.js";
+const FONTS = { mono: F.mono, sans: F.body, nunito: F.display };
 
 const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const DAY_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
