@@ -1,27 +1,44 @@
 import { useState, useEffect, useCallback } from "react";
-import { FONTS, THEME } from "../../lib/constants.js";
 import { useAuth } from "../../hooks/useAuth.js";
-import { getGymSessions, getExerciseLibrary } from "../../lib/db.js";
+import { getGymSessions, getExerciseLibrary, getAllLatestMeasurements } from "../../lib/db.js";
+import { THEME, TASK_PALETTE, F, lighten, shadeDarken } from "../../lib/theme.js";
+import { PageHeader } from "../../components/layout/PageHeader.jsx";
+import StatTile from "../../components/ui/StatTile.jsx";
 import { WorkoutLogger } from "./components/WorkoutLogger.jsx";
 import { HistoryTab } from "./tabs/HistoryTab.jsx";
 import { CalendarTab } from "./tabs/CalendarTab.jsx";
 import { MeasurementsTab } from "./tabs/MeasurementsTab.jsx";
 import { PhotosTab } from "./tabs/PhotosTab.jsx";
-import { SettingsTab } from "./tabs/SettingsTab.jsx";
+import { ExercisesTab } from "./tabs/ExercisesTab.jsx";
+import { Button } from "../../components/ui/Button.jsx";
+
+const p = TASK_PALETTE.gym;
 
 const TABS = [
-  { key: "history",      label: "History",  icon: "📋" },
-  { key: "calendar",     label: "Calendar", icon: "📅" },
-  { key: "measurements", label: "Measure",  icon: "📏" },
-  { key: "photos",       label: "Photos",   icon: "📷" },
-  { key: "settings",     label: "Settings", icon: "⚙️" },
+  { key: "sessions",   label: "Sessions",   icon: "📋" },
+  { key: "calendar",   label: "Calendar",   icon: "📅" },
+  { key: "exercises",  label: "Exercises",  icon: "🏋️" },
+  { key: "body",       label: "Body",       icon: "📏" },
+  { key: "photos",     label: "Photos",     icon: "📸" },
 ];
+
+function todayLocal() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+
+function sevenDaysAgo() {
+  const d = new Date();
+  d.setDate(d.getDate() - 7);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
 
 export default function GymPage() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("history");
+  const [activeTab, setActiveTab] = useState("sessions");
   const [sessions, setSessions] = useState([]);
   const [library, setLibrary] = useState([]);
+  const [measurements, setMeasurements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loggerOpen, setLoggerOpen] = useState(false);
 
@@ -29,9 +46,14 @@ export default function GymPage() {
     if (!user) return;
     setLoading(true);
     try {
-      const [s, l] = await Promise.all([getGymSessions(user.id, 100), getExerciseLibrary(user.id)]);
+      const [s, l, m] = await Promise.all([
+        getGymSessions(user.id, 100),
+        getExerciseLibrary(user.id),
+        getAllLatestMeasurements(user.id),
+      ]);
       setSessions(s);
       setLibrary(l);
+      setMeasurements(m);
     } finally {
       setLoading(false);
     }
@@ -39,71 +61,78 @@ export default function GymPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Computed stats
+  const weekAgo = sevenDaysAgo();
+  const thisWeek = sessions.filter(s => s.log_date >= weekAgo).length;
+  const totalSessions = sessions.length;
+  let totalVolume = 0;
+  for (const s of sessions) {
+    for (const ex of s.gym_exercises || []) {
+      for (const set of ex.gym_sets || []) {
+        if (set.weight_kg && set.reps) totalVolume += set.weight_kg * set.reps;
+      }
+    }
+  }
+  const activePRs = library.filter(e => e.pr_weight_kg).length;
+  const bodyWeightEntry = measurements.find(m => m.metric === "body_weight");
+  const bodyWeight = bodyWeightEntry ? `${bodyWeightEntry.value_num} kg` : "—";
+
   return (
-    <div style={{ minHeight: "100%", background: THEME.bg, fontFamily: FONTS.sans }}>
-      {/* Page header */}
-      <div style={{ padding: "24px 20px 0", maxWidth: 760, margin: "0 auto" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-          <div>
-            <div style={{ fontFamily: FONTS.nunito, fontWeight: 900, fontSize: 26, color: THEME.ink, letterSpacing: -0.3 }}>
-              💪 Gym
-            </div>
-            <div style={{ fontSize: 12, color: "#E8623A", fontFamily: FONTS.mono, marginTop: 2, letterSpacing: "0.05em" }}>
-              Track every lift · every set · every PR
-            </div>
-          </div>
+    <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <PageHeader
+        kicker="DEEP DIVE · GYM"
+        title="Gym & Training"
+        subtitle="Every set, every rep, every PR"
+        action={
+          <Button variant="primary" size="md" onClick={() => setLoggerOpen(true)}>
+            + Log Workout
+          </Button>
+        }
+      />
+
+      {/* Hero stats */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12, marginBottom: 28 }}>
+        <StatTile label="This Week" value={thisWeek} sublabel="sessions" color={p.fg} />
+        <StatTile label="Total" value={totalSessions} sublabel="sessions" color={p.fg} />
+        <StatTile label="Volume" value={totalVolume > 0 ? `${Math.round(totalVolume/1000)}k` : "—"} sublabel="kg total" color={p.fg} />
+        <StatTile label="Active PRs" value={activePRs} sublabel="exercises" color={p.fg} />
+        <StatTile label="Body Weight" value={bodyWeight} sublabel="latest" color={p.fg} />
+      </div>
+
+      {/* Tab strip */}
+      <div style={{
+        display: "flex", gap: 4, marginBottom: 20,
+        background: THEME.surface, borderRadius: THEME.rMd, padding: 5,
+        border: `1.5px solid ${THEME.line}`, boxShadow: THEME.shadowSm,
+        overflowX: "auto", scrollbarWidth: "none",
+      }}>
+        {TABS.map(tab => (
           <button
-            onClick={() => setLoggerOpen(true)}
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
             style={{
-              padding: "10px 20px",
-              background: "#E8623A",
-              border: "none",
-              borderRadius: THEME.rMd,
-              color: "#fff",
-              fontFamily: FONTS.nunito,
-              fontWeight: 700,
-              fontSize: 14,
-              cursor: "pointer",
-              boxShadow: "0 4px 0 #c44e2a, 0 6px 16px rgba(232,98,58,0.25)",
+              flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              padding: "9px 14px", borderRadius: THEME.rSm, border: "none",
+              background: activeTab === tab.key ? lighten(p.fg, 0.78) : "transparent",
+              color: activeTab === tab.key ? shadeDarken(p.fg, 0.3) : THEME.inkSoft,
+              fontFamily: F.display, fontSize: 13, fontWeight: activeTab === tab.key ? 800 : 600,
+              cursor: "pointer", whiteSpace: "nowrap",
+              boxShadow: activeTab === tab.key ? THEME.shadowSm : "none",
+              transition: "all 0.15s",
             }}
           >
-            + Workout
+            <span style={{ fontSize: 14 }}>{tab.icon}</span>
+            {tab.label}
           </button>
-        </div>
-
-        {/* Tab strip */}
-        <div style={{
-          display: "flex", gap: 0, overflowX: "auto", scrollbarWidth: "none",
-          borderBottom: `1px solid ${THEME.line}`,
-        }}>
-          {TABS.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              style={{
-                padding: "10px 16px", background: "transparent", border: "none",
-                borderBottom: activeTab === tab.key ? `2.5px solid #E8623A` : "2.5px solid transparent",
-                color: activeTab === tab.key ? "#E8623A" : THEME.inkMuted,
-                fontFamily: FONTS.sans, fontSize: 13, fontWeight: activeTab === tab.key ? 600 : 400,
-                cursor: "pointer", whiteSpace: "nowrap", transition: "color 0.15s",
-                display: "flex", alignItems: "center", gap: 5,
-              }}
-            >
-              <span style={{ fontSize: 14 }}>{tab.icon}</span>
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
 
       {/* Tab content */}
-      <div style={{ padding: "24px 20px 60px", maxWidth: 760, margin: "0 auto" }}>
-        {activeTab === "history"      && <HistoryTab sessions={sessions} loading={loading} onStartWorkout={() => setLoggerOpen(true)} />}
-        {activeTab === "calendar"     && <CalendarTab userId={user?.id} sessions={sessions} />}
-        {activeTab === "measurements" && <MeasurementsTab userId={user?.id} />}
-        {activeTab === "photos"       && <PhotosTab userId={user?.id} />}
-        {activeTab === "settings"     && <SettingsTab />}
-      </div>
+      {activeTab === "sessions"  && <HistoryTab sessions={sessions} loading={loading} onStartWorkout={() => setLoggerOpen(true)} />}
+      {activeTab === "calendar"  && <CalendarTab userId={user?.id} sessions={sessions} />}
+      {activeTab === "exercises" && <ExercisesTab library={library} userId={user?.id} onReload={load} />}
+      {activeTab === "body"      && <MeasurementsTab userId={user?.id} />}
+      {activeTab === "photos"    && <PhotosTab userId={user?.id} />}
 
       <WorkoutLogger
         open={loggerOpen}

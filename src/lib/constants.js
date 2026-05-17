@@ -1,26 +1,5 @@
-// ─── Marshmallow Theme ────────────────────────────────────────────────────────
-export const THEME = {
-  bg:          "#FBF5EC",
-  bgAlt:       "#F3EBD8",
-  surface:     "#FFFFFF",
-  surfaceAlt:  "#FDF8F2",
-  ink:         "#2B1E18",
-  inkSoft:     "#6B5444",
-  inkMuted:    "#9C8170",
-  inkFaint:    "#C4B09A",
-  line:        "#EDE3D5",
-  lineStrong:  "#DDD0BE",
-  primary:     "#FF9F7A",
-  primarySoft: "#FFEADE",
-  shadowSm:    "0 2px 0 0 #E5D3B7",
-  shadowMd:    "0 8px 24px -8px rgba(122,46,14,0.18), 0 2px 0 0 #E5D3B7",
-  shadowChunk: "0 6px 0 -1px #E5D3B7, 0 14px 30px -10px rgba(122,46,14,0.2)",
-  rSm:  "12px",
-  rMd:  "18px",
-  rLg:  "24px",
-  rXl:  "32px",
-  rPill:"999px",
-};
+// ─── Design tokens (re-exported from theme.js) ────────────────────────────────
+export { THEME, TASK_PALETTE, F, lighten, shadeDarken } from "./theme.js";
 
 // ─── Task definitions ─────────────────────────────────────────────────────────
 // bd = edge/border color, tx = foreground accent, bg = pastel background

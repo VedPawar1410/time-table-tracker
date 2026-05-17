@@ -3,8 +3,11 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
   Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
-import { FONTS, THEME, DIET_MEAL_DEFS } from "../../lib/constants.js";
+import { THEME, DIET_MEAL_DEFS } from "../../lib/constants.js";
+import { TASK_PALETTE, F, lighten, shadeDarken } from "../../lib/theme.js";
 import { useAuth } from "../../hooks/useAuth.js";
+import { PageHeader } from "../../components/layout/PageHeader.jsx";
+const FONTS = { mono: F.mono, sans: F.body, nunito: F.display };
 import {
   getDietLogsForDate, getDietLogsForRange,
   createMeal, updateMealTime, updateMealSortOrder, deleteMeal,
@@ -138,33 +141,53 @@ function FoodItemRow({ item, onDelete }) {
   );
 }
 
+const MEAL_PALETTE = {
+  breakfast: TASK_PALETTE.sidehustle,
+  lunch: TASK_PALETTE.diet,
+  dinner: TASK_PALETTE.hobbies,
+  snack: TASK_PALETTE.book,
+};
+
 function MealCard({ meal, onAddFood, onUpdateTime, onDeleteMeal, onDeleteFood }) {
   const { label, icon } = getMealLabel(meal.meal_type);
   const isSnack = meal.meal_type === "snack";
+  const mp = MEAL_PALETTE[meal.meal_type] || TASK_PALETTE.routine;
+  const mealTotals = totals([meal]);
 
   return (
     <div style={{
       background: THEME.surface,
-      border: `1px solid ${THEME.line}`,
-      borderRadius: THEME.rMd, marginBottom: 12, overflow: "hidden",
+      border: `1.5px solid ${THEME.line}`,
+      borderRadius: THEME.rLg, marginBottom: 14, overflow: "hidden",
       boxShadow: THEME.shadowSm,
     }}>
       <div style={{
-        display: "flex", alignItems: "center", gap: 8,
-        padding: "12px 16px", borderBottom: `1px solid ${THEME.line}`,
-        background: THEME.surfaceAlt,
+        display: "flex", alignItems: "center", gap: 10,
+        padding: "12px 16px", background: lighten(mp.fg, 0.88),
+        borderBottom: `1.5px solid ${lighten(mp.fg, 0.72)}`,
       }}>
-        <span style={{ fontSize: 18 }}>{icon}</span>
-        <span style={{ fontFamily: FONTS.nunito, fontWeight: 700, fontSize: 14, color: THEME.ink, flex: 1 }}>
-          {label}
-        </span>
+        <div style={{
+          width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+          background: lighten(mp.fg, 0.75), border: `1.5px solid ${lighten(mp.fg, 0.55)}`,
+          display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
+        }}>{icon}</div>
+        <div style={{ flex: 1 }}>
+          <span style={{ fontFamily: F.display, fontWeight: 800, fontSize: 14, color: THEME.ink }}>
+            {label}
+          </span>
+          {mealTotals.cal > 0 && (
+            <div style={{ fontFamily: F.mono, fontSize: 10, color: mp.fg, marginTop: 1 }}>
+              {mealTotals.cal} kcal · {mealTotals.pro}g P · {mealTotals.carb}g C
+            </div>
+          )}
+        </div>
         <input
           type="time"
           value={meal.meal_time || ""}
           onChange={e => onUpdateTime(meal.id, e.target.value)}
           style={{
             background: "transparent", border: "none",
-            fontFamily: FONTS.mono, fontSize: 11, color: THEME.inkFaint,
+            fontFamily: F.mono, fontSize: 11, color: THEME.inkFaint,
             cursor: "pointer",
           }}
         />
@@ -172,14 +195,12 @@ function MealCard({ meal, onAddFood, onUpdateTime, onDeleteMeal, onDeleteFood })
           <button
             onClick={() => onDeleteMeal(meal.id)}
             style={{ background: "none", border: "none", color: THEME.inkFaint, fontSize: 13, marginLeft: 4, cursor: "pointer" }}
-          >
-            🗑
-          </button>
+          >🗑</button>
         )}
       </div>
       <div style={{ padding: "0 16px" }}>
         {(meal.diet_items || []).length === 0 ? (
-          <div style={{ padding: "12px 0", fontFamily: FONTS.sans, fontSize: 12, color: THEME.inkFaint, textAlign: "center" }}>
+          <div style={{ padding: "12px 0", fontFamily: F.body, fontSize: 12, color: THEME.inkFaint, textAlign: "center" }}>
             Nothing logged yet
           </div>
         ) : (
@@ -192,9 +213,9 @@ function MealCard({ meal, onAddFood, onUpdateTime, onDeleteMeal, onDeleteFood })
         <button
           onClick={() => onAddFood(meal.id)}
           style={{
-            width: "100%", padding: "7px", borderRadius: THEME.rSm,
-            background: "#DCEFC8", border: "1px dashed #CADBB5",
-            color: "#6BAD3A", fontFamily: FONTS.sans, fontSize: 12, cursor: "pointer",
+            width: "100%", padding: "8px", borderRadius: THEME.rMd,
+            background: lighten(mp.fg, 0.9), border: `1.5px dashed ${lighten(mp.fg, 0.65)}`,
+            color: mp.fg, fontFamily: F.display, fontWeight: 700, fontSize: 12, cursor: "pointer",
           }}
         >
           + Add Food
@@ -808,45 +829,46 @@ export default function DietPage() {
     mealRows.push({ type: "snack_btn", parentSortOrder: dinnerMeal.sort_order });
   }
 
+  const dp = TASK_PALETTE.diet;
+
   return (
-    <div style={{
-      minHeight: "100%",
-      background: THEME.bg,
-      fontFamily: FONTS.sans,
-    }}>
-      <div style={{ padding: "24px 20px 80px", maxWidth: 760, margin: "0 auto" }}>
+    <div style={{ maxWidth: 900, margin: "0 auto", fontFamily: F.body }}>
+      <PageHeader
+        kicker="DEEP DIVE · DIET"
+        title="Diet & Nutrition"
+        subtitle="Track every meal, every macro, every day"
+      />
 
-        {/* Header */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 26, color: THEME.ink }}>
-            🥗 Diet
-          </div>
-          <div style={{ fontSize: 11, color: "#6BAD3A", fontFamily: FONTS.mono, marginTop: 2 }}>
-            Track every meal · every day
-          </div>
-        </div>
+      {/* Tabs */}
+      <div style={{
+        display: "flex", gap: 4, marginBottom: 20,
+        background: THEME.surface, borderRadius: THEME.rMd, padding: 5,
+        border: `1.5px solid ${THEME.line}`, boxShadow: THEME.shadowSm,
+      }}>
+        {[
+          { key: "today",    label: "Today",    icon: "🍽️" },
+          { key: "insights", label: "Insights", icon: "📊" },
+        ].map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            style={{
+              flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              padding: "9px 14px", borderRadius: THEME.rSm, border: "none",
+              background: activeTab === tab.key ? lighten(dp.fg, 0.78) : "transparent",
+              color: activeTab === tab.key ? shadeDarken(dp.fg, 0.3) : THEME.inkSoft,
+              fontFamily: F.display, fontSize: 13, fontWeight: activeTab === tab.key ? 800 : 600,
+              cursor: "pointer", boxShadow: activeTab === tab.key ? THEME.shadowSm : "none",
+              transition: "all 0.15s",
+            }}
+          >
+            <span style={{ fontSize: 14 }}>{tab.icon}</span>
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-        {/* Tabs */}
-        <div style={{ display: "flex", borderBottom: `1px solid ${THEME.line}`, marginBottom: 24 }}>
-          {[
-            { key: "today",    label: "Today",    icon: "🍽️" },
-            { key: "insights", label: "Insights", icon: "📊" },
-          ].map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              style={{
-                padding: "10px 16px", background: "transparent", border: "none",
-                borderBottom: activeTab === tab.key ? "2px solid #6BAD3A" : "2px solid transparent",
-                color: activeTab === tab.key ? "#6BAD3A" : THEME.inkMuted,
-                fontFamily: FONTS.sans, fontSize: 13, fontWeight: 500,
-                marginBottom: -1, cursor: "pointer",
-              }}
-            >
-              {tab.icon} {tab.label}
-            </button>
-          ))}
-        </div>
+      <div style={{ paddingBottom: 80 }}>
 
         {/* ── Today Tab ── */}
         {activeTab === "today" && (

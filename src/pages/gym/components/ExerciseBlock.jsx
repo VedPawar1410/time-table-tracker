@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { FONTS, THEME, MUSCLE_GROUPS, DEFAULT_EXERCISES } from "../../../lib/constants.js";
+import { THEME, MUSCLE_GROUPS, DEFAULT_EXERCISES } from "../../../lib/constants.js";
+import { F } from "../../../lib/theme.js";
+const FONTS = { mono: F.mono, sans: F.body, nunito: F.display };
 import { getExerciseHistory } from "../../../lib/db.js";
 
 function detectPR(exerciseName, weightKg, reps, library) {

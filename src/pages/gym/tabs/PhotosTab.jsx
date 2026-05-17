@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { FONTS, THEME } from "../../../lib/constants.js";
+import { THEME } from "../../../lib/constants.js";
+import { TASK_PALETTE, F, lighten } from "../../../lib/theme.js";
+
+const p = TASK_PALETTE.gym;
+const FONTS = { mono: F.mono, sans: F.body, nunito: F.display };
 import { getProgressPhotos, uploadProgressPhoto, deleteProgressPhoto } from "../../../lib/db.js";
 import { supabase } from "../../../lib/supabase.js";
 

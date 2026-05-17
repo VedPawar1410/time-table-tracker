@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { FONTS, THEME, MEASUREMENT_METRICS, METRIC_UNITS } from "../../../lib/constants.js";
+import { THEME, MEASUREMENT_METRICS, METRIC_UNITS } from "../../../lib/constants.js";
+import { TASK_PALETTE, F, lighten } from "../../../lib/theme.js";
 import { CalendarPicker } from "../../../components/ui/CalendarPicker.jsx";
 import { getAllLatestMeasurements, getMeasurements, addMeasurement, deleteMeasurement } from "../../../lib/db.js";
+
+const p = TASK_PALETTE.gym;
 
 function todayKey() {
   const d = new Date();
@@ -58,85 +61,79 @@ export function MeasurementsTab({ userId }) {
 
   const renderSection = (title, metrics) => (
     <div style={{ marginBottom: 28 }} key={title}>
-      <div style={{ fontSize: 10, color: THEME.inkMuted, fontFamily: FONTS.mono, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>{title}</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <div style={{ fontFamily: F.mono, fontSize: 10, fontWeight: 700, color: THEME.inkMuted, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>{title}</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 8 }}>
         {metrics.map(metric => {
           const rec = latestMap[metric];
           const unit = unitFor(metric);
           const isActive = activeMetric === metric;
           return (
             <div key={metric}>
-              <div style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "13px 14px",
-                background: isActive ? "#FFEADE" : THEME.surface,
-                borderRadius: isActive ? `${THEME.rSm} ${THEME.rSm} 0 0` : THEME.rSm,
-                border: `1px solid ${isActive ? THEME.primary : THEME.line}`,
-                borderBottom: isActive ? "none" : undefined,
-                cursor: "pointer",
-                transition: "background 0.15s",
-                boxShadow: isActive ? "none" : THEME.shadowSm,
-              }}
+              <div
                 onClick={() => openMetric(metric)}
+                style={{
+                  padding: "14px 16px",
+                  background: isActive ? lighten(p.fg, 0.88) : THEME.surface,
+                  borderRadius: isActive ? `${THEME.rMd}px ${THEME.rMd}px 0 0` : THEME.rMd,
+                  border: `1.5px solid ${isActive ? lighten(p.fg, 0.65) : THEME.line}`,
+                  borderBottom: isActive ? "none" : undefined,
+                  cursor: "pointer", transition: "background 0.15s",
+                  boxShadow: isActive ? "none" : THEME.shadowSm,
+                }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={{ fontFamily: FONTS.sans, fontSize: 14, color: THEME.ink, fontWeight: 500 }}>{metric}</span>
-                  {rec && (
-                    <span style={{ fontSize: 11, color: THEME.inkFaint, fontFamily: FONTS.sans }}>
-                      Last: {rec.log_date}
-                    </span>
-                  )}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  {rec && (
-                    <span style={{ fontFamily: FONTS.mono, fontSize: 15, color: "#E8623A", fontWeight: 600 }}>
-                      {rec.value_num} <span style={{ fontSize: 11, color: THEME.inkMuted }}>{unit}</span>
-                    </span>
-                  )}
-                  {!rec && <span style={{ color: THEME.inkFaint, fontSize: 12, fontFamily: FONTS.sans }}>—</span>}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <div style={{ fontFamily: F.display, fontWeight: 700, fontSize: 13, color: THEME.ink, marginBottom: 4 }}>{metric}</div>
+                    {rec ? (
+                      <div style={{ fontFamily: F.mono, fontSize: 18, fontWeight: 700, color: p.fg }}>
+                        {rec.value_num} <span style={{ fontSize: 11, color: THEME.inkMuted }}>{unit}</span>
+                      </div>
+                    ) : (
+                      <div style={{ fontFamily: F.mono, fontSize: 16, color: THEME.inkFaint }}>—</div>
+                    )}
+                    {rec && <div style={{ fontFamily: F.body, fontSize: 11, color: THEME.inkFaint, marginTop: 2 }}>{rec.log_date}</div>}
+                  </div>
                   <button
                     onClick={e => { e.stopPropagation(); setAddingFor(metric); setAddVal(""); setAddDate(todayKey()); }}
                     style={{
-                      width: 28, height: 28, borderRadius: THEME.rSm, background: "#FFDDD0",
-                      border: "1px solid #F5C4B5", color: "#E8623A",
-                      fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                      fontWeight: 700, flexShrink: 0,
+                      width: 28, height: 28, borderRadius: 8, flexShrink: 0,
+                      background: lighten(p.fg, 0.82), border: `1.5px solid ${lighten(p.fg, 0.65)}`,
+                      color: p.fg, fontSize: 16, cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700,
                     }}
                   >+</button>
                 </div>
               </div>
 
-              {/* Expanded chart + history */}
               {isActive && (
-                <div style={{ padding: "14px", background: THEME.surfaceAlt, border: `1px solid ${THEME.primary}`, borderTop: "none", borderRadius: `0 0 ${THEME.rSm} ${THEME.rSm}` }}>
+                <div style={{ padding: "14px", background: THEME.surfaceAlt, border: `1.5px solid ${lighten(p.fg, 0.65)}`, borderTop: "none", borderRadius: `0 0 ${THEME.rMd}px ${THEME.rMd}px` }}>
                   {chartLoading ? (
-                    <div style={{ textAlign: "center", padding: 20, color: THEME.inkFaint, fontFamily: FONTS.mono, fontSize: 11 }}>Loading chart...</div>
+                    <div style={{ textAlign: "center", padding: 20, color: THEME.inkFaint, fontFamily: F.mono, fontSize: 11, letterSpacing: 2 }}>LOADING...</div>
                   ) : chartData.length < 2 ? (
-                    <div style={{ textAlign: "center", padding: 16, color: THEME.inkMuted, fontFamily: FONTS.sans, fontSize: 12 }}>
+                    <div style={{ textAlign: "center", padding: 16, color: THEME.inkMuted, fontFamily: F.body, fontSize: 12 }}>
                       Add {2 - chartData.length} more {chartData.length === 1 ? "entry" : "entries"} to see chart
                     </div>
                   ) : (
                     <ResponsiveContainer width="100%" height={140}>
                       <LineChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-                        <XAxis dataKey="date" tick={{ fontSize: 9, fill: THEME.inkFaint, fontFamily: FONTS.mono }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-                        <YAxis tick={{ fontSize: 9, fill: THEME.inkFaint, fontFamily: FONTS.mono }} tickLine={false} axisLine={false} />
+                        <XAxis dataKey="date" tick={{ fontSize: 9, fill: THEME.inkFaint, fontFamily: F.mono }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+                        <YAxis tick={{ fontSize: 9, fill: THEME.inkFaint, fontFamily: F.mono }} tickLine={false} axisLine={false} />
                         <Tooltip
-                          contentStyle={{ background: THEME.surface, border: `1px solid ${THEME.line}`, borderRadius: 8, fontFamily: FONTS.mono, fontSize: 11 }}
+                          contentStyle={{ background: THEME.surface, border: `1px solid ${THEME.line}`, borderRadius: 8, fontFamily: F.mono, fontSize: 11 }}
                           labelStyle={{ color: THEME.inkMuted }}
-                          itemStyle={{ color: "#E8623A" }}
+                          itemStyle={{ color: p.fg }}
                         />
-                        <Line type="monotone" dataKey="value" stroke="#E8623A" strokeWidth={2} dot={{ r: 3, fill: "#E8623A" }} activeDot={{ r: 5 }} />
+                        <Line type="monotone" dataKey="value" stroke={p.fg} strokeWidth={2} dot={{ r: 3, fill: p.fg }} activeDot={{ r: 5 }} />
                       </LineChart>
                     </ResponsiveContainer>
                   )}
-                  {/* History list (last 5) */}
                   {chartData.length > 0 && (
                     <div style={{ marginTop: 10 }}>
                       {[...chartData].reverse().slice(0, 5).map(row => (
                         <div key={row.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: `1px solid ${THEME.line}` }}>
-                          <span style={{ fontSize: 12, color: THEME.inkMuted, fontFamily: FONTS.sans }}>{row.date}</span>
+                          <span style={{ fontSize: 12, color: THEME.inkMuted, fontFamily: F.body }}>{row.date}</span>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <span style={{ fontSize: 13, color: THEME.ink, fontFamily: FONTS.mono }}>{row.value} {unit}</span>
+                            <span style={{ fontSize: 13, color: THEME.ink, fontFamily: F.mono }}>{row.value} {unit}</span>
                             <button onClick={() => deleteMeasurement(row.id).then(() => { setChartData(d => d.filter(r => r.id !== row.id)); loadLatest(); })}
                               style={{ background: "transparent", border: "none", color: THEME.inkFaint, cursor: "pointer", fontSize: 12 }}>✕</button>
                           </div>
@@ -156,7 +153,7 @@ export function MeasurementsTab({ userId }) {
   return (
     <div>
       {loading ? (
-        <div style={{ textAlign: "center", padding: 40, color: THEME.inkFaint, fontFamily: FONTS.mono, fontSize: 12 }}>Loading...</div>
+        <div style={{ textAlign: "center", padding: 40, color: THEME.inkFaint, fontFamily: F.mono, fontSize: 12, letterSpacing: 2 }}>LOADING...</div>
       ) : (
         <>
           {renderSection("CORE", MEASUREMENT_METRICS.CORE)}
@@ -164,19 +161,18 @@ export function MeasurementsTab({ userId }) {
         </>
       )}
 
-      {/* Add measurement modal */}
       {addingFor && (
         <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(43,30,24,0.35)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-          <div style={{ background: THEME.surface, border: `1px solid ${THEME.line}`, borderRadius: THEME.rLg, padding: 24, width: "100%", maxWidth: 360, boxShadow: THEME.shadowMd }}>
-            <div style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 15, color: THEME.ink, marginBottom: 4 }}>Add {addingFor}</div>
-            <div style={{ fontSize: 11, color: THEME.inkMuted, fontFamily: FONTS.sans, marginBottom: 16 }}>Unit: {unitFor(addingFor)}</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 18 }}>
+          <div className="pop-in" style={{ background: THEME.surface, border: `1.5px solid ${THEME.line}`, borderRadius: THEME.rLg, padding: 28, width: "100%", maxWidth: 360, boxShadow: THEME.shadowLg }}>
+            <div style={{ fontFamily: F.display, fontWeight: 900, fontSize: 16, color: THEME.ink, marginBottom: 4 }}>Add {addingFor}</div>
+            <div style={{ fontSize: 11, color: THEME.inkMuted, fontFamily: F.body, marginBottom: 18 }}>Unit: {unitFor(addingFor)}</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
               <CalendarPicker label="Date" value={addDate} onChange={v => setAddDate(v)} />
               <Field label={`Value (${unitFor(addingFor)})`}><input type="number" value={addVal} onChange={e => setAddVal(e.target.value)} placeholder="0.0" step="0.1" autoFocus style={iStyle()} /></Field>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => setAddingFor(null)} style={{ flex: 1, padding: "9px", background: THEME.surfaceAlt, border: `1px solid ${THEME.line}`, borderRadius: THEME.rSm, color: THEME.inkSoft, fontFamily: FONTS.sans, fontSize: 13, cursor: "pointer" }}>Cancel</button>
-              <button onClick={handleAdd} disabled={saving || !addVal} style={{ flex: 2, padding: "9px", background: "#E8623A", border: "none", borderRadius: THEME.rSm, color: "#fff", fontFamily: FONTS.nunito, fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: saving || !addVal ? 0.6 : 1 }}>
+              <button onClick={() => setAddingFor(null)} style={{ flex: 1, padding: "10px", background: THEME.bg, border: `1.5px solid ${THEME.line}`, borderRadius: THEME.rMd, color: THEME.inkSoft, fontFamily: F.display, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Cancel</button>
+              <button onClick={handleAdd} disabled={saving || !addVal} style={{ flex: 2, padding: "10px", background: p.fg, border: "none", borderRadius: THEME.rMd, color: "#fff", fontFamily: F.display, fontWeight: 800, fontSize: 13, cursor: "pointer", opacity: saving || !addVal ? 0.6 : 1, boxShadow: `0 3px 0 0 ${p.deep}` }}>
                 {saving ? "Saving..." : "Save"}
               </button>
             </div>
@@ -190,12 +186,12 @@ export function MeasurementsTab({ userId }) {
 function Field({ label, children }) {
   return (
     <div>
-      <div style={{ fontSize: 10, color: THEME.inkMuted, fontFamily: FONTS.mono, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 5 }}>{label}</div>
+      <div style={{ fontFamily: F.mono, fontSize: 10, fontWeight: 700, color: THEME.inkMuted, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>{label}</div>
       {children}
     </div>
   );
 }
 
 function iStyle() {
-  return { background: THEME.surface, border: `1.5px solid ${THEME.line}`, borderRadius: THEME.rSm, padding: "8px 10px", color: THEME.ink, fontSize: 13, fontFamily: FONTS.sans, outline: "none", width: "100%" };
+  return { background: THEME.surface, border: `1.5px solid ${THEME.line}`, borderRadius: THEME.rMd, padding: "10px 14px", color: THEME.ink, fontSize: 14, fontFamily: F.body, outline: "none", width: "100%" };
 }

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth.js";
 import { migrateLocalStorageToSupabase } from "../../lib/migrate.js";
-import { FONTS } from "../../lib/constants.js";
+import { THEME, F } from "../../lib/theme.js";
 
 export function AuthGuard({ children }) {
   const { user, loading } = useAuth();
@@ -18,8 +18,11 @@ export function AuthGuard({ children }) {
 
   if (loading) {
     return (
-      <div style={{ minHeight: "100vh", background: "#08091A", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ fontFamily: FONTS.mono, fontSize: 12, color: "#4ADE80", letterSpacing: 3 }}>LOADING...</div>
+      <div style={{ minHeight: "100vh", background: THEME.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+          <div style={{ fontSize: 42 }}>⏰</div>
+          <div style={{ fontFamily: F.mono, fontSize: 11, color: THEME.primary, letterSpacing: 3, fontWeight: 600 }}>LOADING...</div>
+        </div>
       </div>
     );
   }

@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { FONTS, THEME } from "../../lib/constants.js";
+import { THEME } from "../../lib/constants.js";
+import { TASK_PALETTE, F, lighten } from "../../lib/theme.js";
+import { PageHeader } from "../../components/layout/PageHeader.jsx";
+import Card from "../../components/ui/Card.jsx";
 import { useAuth } from "../../hooks/useAuth.js";
+const FONTS = { mono: F.mono, sans: F.body, nunito: F.display };
 import {
   getJobPrepDailyLog,
   upsertJobPrepDailyLog,
@@ -516,62 +520,63 @@ export default function JobPrepPage() {
     setActiveTab("daily");
   };
 
+  const jp = TASK_PALETTE.jobprep;
+
   return (
-    <div style={{
-      minHeight: "100%",
-      background: THEME.bg,
-      fontFamily: FONTS.sans,
-    }}>
-      <div style={{ padding: "24px 20px 80px", maxWidth: 760, margin: "0 auto" }}>
+    <div style={{ maxWidth: 800, margin: "0 auto", fontFamily: F.body }}>
+      <PageHeader
+        kicker="DEEP DIVE · JOB PREP"
+        title="GM Job Prep"
+        subtitle="General Motors · Automation Controls Engineer · Bangalore"
+      />
 
-        {/* Header */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 26, color: THEME.ink, letterSpacing: -0.5 }}>
-            🔥 GM Job Prep
+      {/* Stats */}
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
+        {[
+          { label: "Days Logged",  value: daysLogged },
+          { label: "Study Hours",  value: `${Math.round(totalMins / 60 * 10) / 10}h` },
+          { label: "Day Streak",   value: `${streak} 🔥` },
+        ].map(c => (
+          <div key={c.label} style={{
+            background: lighten(jp.fg, 0.88), border: `1.5px solid ${lighten(jp.fg, 0.7)}`,
+            borderRadius: THEME.rMd, padding: "10px 16px",
+            display: "flex", flexDirection: "column", alignItems: "center", minWidth: 100,
+            boxShadow: THEME.shadowSm,
+          }}>
+            <span style={{ fontFamily: F.display, fontWeight: 900, fontSize: 20, color: jp.fg }}>{c.value}</span>
+            <span style={{ fontFamily: F.mono, fontSize: 9, color: THEME.inkMuted, textTransform: "uppercase", letterSpacing: 1, marginTop: 2 }}>{c.label}</span>
           </div>
-          <div style={{ fontFamily: FONTS.mono, fontSize: 11, color: ACCENT, marginTop: 4, letterSpacing: 1 }}>
-            General Motors · Automation Controls Engineer · Bangalore
-          </div>
-        </div>
+        ))}
+      </div>
 
-        {/* Stats */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
-          {[
-            { label: "Days Logged",  value: daysLogged },
-            { label: "Study Hours",  value: `${Math.round(totalMins / 60 * 10) / 10}h` },
-            { label: "Day Streak",   value: `${streak} 🔥` },
-          ].map(c => (
-            <div key={c.label} style={{
-              background: ACCENT_BG, border: `1px solid #F5BEC9`,
-              borderRadius: THEME.rMd, padding: "8px 14px",
-              display: "flex", flexDirection: "column", alignItems: "center", minWidth: 90,
-              boxShadow: THEME.shadowSm,
-            }}>
-              <span style={{ fontFamily: FONTS.nunito, fontWeight: 800, fontSize: 18, color: ACCENT }}>{c.value}</span>
-              <span style={{ fontFamily: FONTS.mono, fontSize: 9, color: THEME.inkMuted, textTransform: "uppercase", letterSpacing: 1 }}>{c.label}</span>
-            </div>
-          ))}
-        </div>
+      {/* Roadmap */}
+      <RoadmapPanel open={roadmapOpen} onToggle={() => setRoadmapOpen(o => !o)} />
 
-        {/* Roadmap */}
-        <RoadmapPanel open={roadmapOpen} onToggle={() => setRoadmapOpen(o => !o)} />
+      {/* Tabs */}
+      <div style={{
+        display: "flex", gap: 4, marginBottom: 20,
+        background: THEME.surface, borderRadius: THEME.rMd, padding: 5,
+        border: `1.5px solid ${THEME.line}`, boxShadow: THEME.shadowSm,
+      }}>
+        {TABS.map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            style={{
+              flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+              padding: "9px 12px", borderRadius: THEME.rSm, border: "none",
+              background: activeTab === tab.key ? lighten(jp.fg, 0.78) : "transparent",
+              color: activeTab === tab.key ? jp.deep : THEME.inkSoft,
+              fontFamily: F.display, fontSize: 13, fontWeight: activeTab === tab.key ? 800 : 600,
+              cursor: "pointer", whiteSpace: "nowrap",
+              boxShadow: activeTab === tab.key ? THEME.shadowSm : "none",
+              transition: "all 0.15s",
+            }}
+          >{tab.label}</button>
+        ))}
+      </div>
 
-        {/* Tabs */}
-        <div style={{ display: "flex", borderBottom: `1px solid ${THEME.line}`, marginBottom: 24, overflowX: "auto" }}>
-          {TABS.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              style={{
-                padding: "10px 16px", background: "transparent", border: "none",
-                borderBottom: activeTab === tab.key ? `2px solid ${ACCENT}` : "2px solid transparent",
-                color: activeTab === tab.key ? ACCENT : THEME.inkMuted,
-                fontFamily: FONTS.sans, fontSize: 13, fontWeight: 500,
-                marginBottom: -1, whiteSpace: "nowrap", cursor: "pointer",
-              }}
-            >{tab.label}</button>
-          ))}
-        </div>
+      <div style={{ paddingBottom: 60 }}>
 
         {activeTab === "daily" && (
           <DailyLogTab

@@ -1,75 +1,33 @@
-import { THEME, FONTS } from "../../lib/constants";
+import { THEME, F, lighten, shadeDarken } from "../../lib/theme.js";
 
-export default function StatTile({ label, value, sub, icon, color, style }) {
+export default function StatTile({ label, value, sublabel, sub, color, icon, sticker, style = {} }) {
   const c = color || THEME.primary;
   return (
-    <div
-      style={{
-        background: THEME.surface,
-        border: `1px solid ${THEME.line}`,
-        borderRadius: THEME.rMd,
-        boxShadow: THEME.shadowSm,
-        padding: "14px 16px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
-        minWidth: 0,
-        ...style,
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        {icon && (
-          <span
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: THEME.rSm,
-              background: c + "22",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 14,
-              flexShrink: 0,
-            }}
-          >
-            {icon}
-          </span>
-        )}
-        <span
-          style={{
-            fontFamily: FONTS.mono,
-            fontSize: 9,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            color: THEME.inkMuted,
-            lineHeight: 1,
-          }}
-        >
+    <div style={{
+      flex: 1, minWidth: 120,
+      background: lighten(c, 0.82),
+      border: `1.5px solid ${lighten(c, 0.6)}`,
+      borderRadius: THEME.rLg,
+      padding: "14px 16px",
+      position: "relative", overflow: "hidden",
+      ...style,
+    }}>
+      {sticker && (
+        <div style={{ position: "absolute", top: -8, right: -8, opacity: 0.35 }}>{sticker}</div>
+      )}
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+        {icon && <span style={{ fontSize: 14 }}>{icon}</span>}
+        <div style={{ fontFamily: F.display, fontSize: 11, fontWeight: 700, color: shadeDarken(c, 0.4), textTransform: "uppercase", letterSpacing: 0.5 }}>
           {label}
-        </span>
+        </div>
       </div>
-      <span
-        style={{
-          fontFamily: FONTS.nunito,
-          fontSize: 26,
-          fontWeight: 800,
-          color: THEME.ink,
-          lineHeight: 1.1,
-        }}
-      >
+      <div style={{ fontFamily: F.display, fontSize: 26, fontWeight: 900, color: shadeDarken(c, 0.55), lineHeight: 1.05 }}>
         {value}
-      </span>
-      {sub && (
-        <span
-          style={{
-            fontFamily: FONTS.sans,
-            fontSize: 11.5,
-            color: THEME.inkMuted,
-            lineHeight: 1,
-          }}
-        >
-          {sub}
-        </span>
+      </div>
+      {(sublabel || sub) && (
+        <div style={{ fontSize: 11.5, color: shadeDarken(c, 0.3), marginTop: 3, fontWeight: 600 }}>
+          {sublabel || sub}
+        </div>
       )}
     </div>
   );
